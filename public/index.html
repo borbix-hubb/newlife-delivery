@@ -314,6 +314,24 @@ let files = []
 let carrier = 'inter'
 let rows = { inter: [], dmk: [] }
 let editingRow = { inter: -1, dmk: -1 }
+let sessionDate = new Date().toISOString().slice(0, 10)
+
+// ── INIT: โหลดข้อมูลวันนี้จาก DB ──
+async function initLoad() {
+  try {
+    const res = await fetch(`/api/rows?date=${sessionDate}`)
+    const data = await res.json()
+    if (data.ok) {
+      rows.inter = data.rows.filter(r => r.carrier === 'inter')
+      rows.dmk   = data.rows.filter(r => r.carrier === 'dmk')
+      renderAll()
+      if (rows.inter.length || rows.dmk.length) {
+        showToast(`📂 โหลดข้อมูลวันนี้ ${rows.inter.length + rows.dmk.length} รายการ`)
+      }
+    }
+  } catch(e) { console.warn('initLoad failed', e.message) }
+}
+initLoad()
 
 // ── CARRIER ──
 function setCarrier(c) {
@@ -410,6 +428,8 @@ async function scanFiles(fileList) {
 
   const fd = new FormData()
   fileList.forEach(f => fd.append('images', f))
+  fd.append('carrier', carrier)
+  fd.append('session_date', sessionDate)
 
   try {
     document.getElementById('pf').style.width = '40%'
@@ -422,13 +442,12 @@ async function scanFiles(fileList) {
 
     if (!data.ok) throw new Error(data.error || 'AI อ่านไม่สำเร็จ')
 
-    // เพิ่มข้อมูลใหม่ต่อท้าย (สะสม)
+    // ข้อมูลจาก DB (มี id แล้ว) เพิ่มต่อท้าย
     rows[carrier] = [...rows[carrier], ...data.results]
-    // ล้างเฉพาะ files ที่เพิ่งสแกนไป
     files = files.filter(f => !fileList.includes(f))
     renderThumbs()
     renderAll()
-    showToast(`✅ เพิ่ม ${data.results.length} ใบ → ${carrier === 'inter' ? 'Inter' : 'DMK'}`)
+    showToast(`✅ บันทึก ${data.results.length} ใบ → ${carrier === 'inter' ? 'Inter' : 'DMK'}`)
   } catch(e) {
     showToast('❌ ' + (e.message || 'เกิดข้อผิดพลาด'))
     showPending()
@@ -519,16 +538,55 @@ function renderTbl(c) {
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;') }
 
 function startEdit(c, i) { editingRow[c] = i; renderTbl(c) }
-function saveEdit(c, i) { editingRow[c] = -1; renderTbl(c); showToast('✅ บันทึกแล้ว') }
-function delRow(c, i) { rows[c].splice(i,1); if(editingRow[c]>=rows[c].length) editingRow[c]=-1; renderAll() }
-function addRow(c) {
-  rows[c].push({ shop_name:'', province:'', invoice_no:'', quantity:0, red_sticker:false })
+
+async function saveEdit(c, i) {
+  const r = rows[c][i]
+  editingRow[c] = -1
+  renderTbl(c)
+  // sync to DB ถ้ามี id
+  if (r.id) {
+    try {
+      await fetch(`/api/rows/${r.id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shop_name: r.shop_name, province: r.province, invoice_no: r.invoice_no, quantity: r.quantity, red_sticker: r.red_sticker })
+      })
+    } catch(e) { console.warn('save failed', e) }
+  }
+  showToast('✅ บันทึกแล้ว')
+}
+
+async function delRow(c, i) {
+  const r = rows[c][i]
+  rows[c].splice(i, 1)
+  if (editingRow[c] >= rows[c].length) editingRow[c] = -1
+  renderAll()
+  // sync to DB
+  if (r.id) {
+    try { await fetch(`/api/rows/${r.id}`, { method: 'DELETE' }) } catch(e) {}
+  }
+}
+
+async function addRow(c) {
+  try {
+    const res = await fetch('/api/rows', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ carrier: c, session_date: sessionDate, shop_name:'', province:'', invoice_no:'', quantity:0, red_sticker:false })
+    })
+    const data = await res.json()
+    const newRow = data.ok ? data.row : { shop_name:'', province:'', invoice_no:'', quantity:0, red_sticker:false }
+    rows[c].push(newRow)
+  } catch(e) {
+    rows[c].push({ shop_name:'', province:'', invoice_no:'', quantity:0, red_sticker:false })
+  }
   editingRow[c] = rows[c].length - 1
   renderAll()
 }
-function clearRows(c) {
+
+async function clearRows(c) {
   if (!confirm(`เคลียร์ ${c==='inter'?'Inter':'DMK'} ทั้งหมด?`)) return
-  rows[c] = []; editingRow[c] = -1; renderAll(); showToast('🗑️ เคลียร์แล้ว')
+  rows[c] = []; editingRow[c] = -1; renderAll()
+  try { await fetch(`/api/rows?carrier=${c}&date=${sessionDate}`, { method: 'DELETE' }) } catch(e) {}
+  showToast('🗑️ เคลียร์แล้ว')
 }
 
 // ── EXPORT ──
