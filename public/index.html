@@ -62,12 +62,19 @@ body{font-family:'Inter','Noto Sans Thai',sans-serif;background:var(--bg);color:
 .search-x.show{display:block}
 
 /* ── SUMMARY ── */
-.sumbar{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sumbar{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:10px 14px;margin-bottom:14px;display:flex;flex-direction:column;gap:8px}
+.sum-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .sum-item{display:flex;align-items:center;gap:9px}
 .sum-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .sum-lbl{font-size:11px;color:var(--tx2)}
 .sum-val{font-size:18px;font-weight:800;color:var(--tx);line-height:1}
 .sum-sep{width:1px;height:32px;background:var(--bd)}
+.sum-slot-row{display:flex;gap:8px;flex-wrap:wrap;border-top:1px dashed var(--bd);padding-top:8px}
+.sum-slot-item{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:5px 10px}
+.sum-slot-item.am{border-color:var(--amber);background:#fffbeb}
+.sum-slot-item.pm{border-color:var(--dmk);background:var(--dmk-bg)}
+.sum-slot-lbl{font-size:11px;color:var(--tx2)}
+.sum-slot-val{font-size:14px;font-weight:700;color:var(--tx)}
 
 /* ── CARRIER GRID ── */
 .cp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
@@ -238,15 +245,7 @@ tr:hover td{background:#f8faff}
   </div>
 
   <!-- SUMMARY -->
-  <div class="sumbar" id="sumbar" style="display:none">
-    <div class="sum-item"><div class="sum-dot" style="background:var(--inter)"></div><div><div class="sum-lbl">Inter</div><div class="sum-val" id="sv-i">0</div></div></div>
-    <div class="sum-sep"></div>
-    <div class="sum-item"><div class="sum-dot" style="background:var(--dmk)"></div><div><div class="sum-lbl">DMK</div><div class="sum-val" id="sv-d">0</div></div></div>
-    <div class="sum-sep"></div>
-    <div class="sum-item"><div class="sum-dot" style="background:var(--green)"></div><div><div class="sum-lbl">รวมกล่อง</div><div class="sum-val" id="sv-box">0</div></div></div>
-    <div class="sum-sep"></div>
-    <div class="sum-item"><div class="sum-dot" style="background:var(--tx)"></div><div><div class="sum-lbl">รายการ</div><div class="sum-val" id="sv-all">0</div></div></div>
-  </div>
+  <div class="sumbar" id="sumbar" style="display:none"><!-- inject --></div>
 
   <!-- UPLOAD CARD -->
   <div class="card">
@@ -500,12 +499,7 @@ function renderSearch(sRows) {
   } else { secD.style.display='none' }
 
   emp.style.display='none'
-  const tot=sRows.reduce((s,r)=>s+(+r.quantity||0),0)
-  document.getElementById('sv-i').textContent=sRows.filter(r=>r.carrier==='inter').length
-  document.getElementById('sv-d').textContent=sRows.filter(r=>r.carrier==='dmk').length
-  document.getElementById('sv-all').textContent=sRows.length
-  document.getElementById('sv-box').textContent=tot
-  sumbar.style.display='flex'
+  renderSumbar(sRows)
 }
 
 function clearSearch() {
@@ -599,17 +593,45 @@ async function scanFiles(fl){
 }
 
 // ── RENDER ──
+function renderSumbar(allR) {
+  const sumbar = document.getElementById('sumbar')
+  const iRows = allR.filter(r=>r.carrier==='inter')
+  const dRows = allR.filter(r=>r.carrier==='dmk')
+  const totalBox = allR.reduce((s,r)=>s+(+r.quantity||0),0)
+  const hasSlot = allR.some(r=>r.session_slot)
+  const amBox = allR.filter(r=>r.session_slot==='เช้า').reduce((s,r)=>s+(+r.quantity||0),0)
+  const pmBox = allR.filter(r=>r.session_slot==='บ่าย').reduce((s,r)=>s+(+r.quantity||0),0)
+  const amCnt = allR.filter(r=>r.session_slot==='เช้า').length
+  const pmCnt = allR.filter(r=>r.session_slot==='บ่าย').length
+
+  let html = `<div class="sum-row">
+    <div class="sum-item"><div class="sum-dot" style="background:var(--inter)"></div><div><div class="sum-lbl">Inter</div><div class="sum-val">${iRows.length}</div></div></div>
+    <div class="sum-sep"></div>
+    <div class="sum-item"><div class="sum-dot" style="background:var(--dmk)"></div><div><div class="sum-lbl">DMK</div><div class="sum-val">${dRows.length}</div></div></div>
+    <div class="sum-sep"></div>
+    <div class="sum-item"><div class="sum-dot" style="background:var(--green)"></div><div><div class="sum-lbl">รวมกล่อง</div><div class="sum-val">${totalBox}</div></div></div>
+    <div class="sum-sep"></div>
+    <div class="sum-item"><div class="sum-dot" style="background:var(--tx)"></div><div><div class="sum-lbl">รายการ</div><div class="sum-val">${allR.length}</div></div></div>
+  </div>`
+  if (hasSlot) {
+    html += `<div class="sum-slot-row">`
+    if (amCnt) html += `<div class="sum-slot-item am"><span>☀️</span><div><div class="sum-slot-lbl">เช้า (${amCnt} ใบ)</div><div class="sum-slot-val">${amBox} กล่อง</div></div></div>`
+    if (pmCnt) html += `<div class="sum-slot-item pm"><span>🌙</span><div><div class="sum-slot-lbl">บ่าย (${pmCnt} ใบ)</div><div class="sum-slot-val">${pmBox} กล่อง</div></div></div>`
+    html += `</div>`
+  }
+  sumbar.innerHTML = html
+  sumbar.style.display = 'flex'
+}
+
 function renderAll(){
+  if (searchMode) return  // search mode — handled by renderSearch()
   const fi=filterRows(rows.inter), fd=filterRows(rows.dmk)
   const hi=rows.inter.length>0, hd=rows.dmk.length>0
   document.getElementById('secI').style.display=hi?'block':'none'
   document.getElementById('secD').style.display=hd?'block':'none'
   document.getElementById('emp').style.display=(!hi&&!hd)?'block':'none'
-  document.getElementById('sumbar').style.display=(hi||hd)?'flex':'none'
-  document.getElementById('sv-i').textContent=rows.inter.length
-  document.getElementById('sv-d').textContent=rows.dmk.length
-  document.getElementById('sv-all').textContent=rows.inter.length+rows.dmk.length
-  document.getElementById('sv-box').textContent=[...rows.inter,...rows.dmk].reduce((s,r)=>s+(+r.quantity||0),0)
+  if (hi||hd) renderSumbar([...rows.inter,...rows.dmk])
+  else document.getElementById('sumbar').style.display='none'
   const sc=(f,a)=>f.length!==a.length?`${f.length}/${a.length} รายการ`:`${a.length} รายการ`
   document.getElementById('cntI').textContent=sc(fi,rows.inter)
   document.getElementById('cntD').textContent=sc(fd,rows.dmk)

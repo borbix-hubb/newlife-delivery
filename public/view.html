@@ -48,12 +48,19 @@ body{font-family:'Inter','Noto Sans Thai',sans-serif;background:var(--bg);color:
 .search-hint{font-size:10px;color:var(--tx3);white-space:nowrap}
 
 /* SUMMARY */
-.sumbar{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sumbar{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:10px 14px;margin-bottom:10px;display:flex;align-items:stretch;flex-direction:column;gap:8px;flex-wrap:wrap}
+.sum-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .si2{display:flex;align-items:center;gap:8px}
 .sd2{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .sl2{font-size:11px;color:var(--tx2)}
 .sv{font-size:17px;font-weight:700}
 .ssep{width:1px;height:30px;background:var(--bd)}
+.sum-slot-row{display:flex;gap:8px;flex-wrap:wrap;border-top:1px dashed var(--bd);padding-top:8px}
+.sum-slot-item{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:5px 10px}
+.sum-slot-item.am{border-color:var(--amber);background:#fffbeb}
+.sum-slot-item.pm{border-color:var(--dmk);background:#faf5ff}
+.sum-slot-lbl{font-size:11px;color:var(--tx2)}
+.sum-slot-val{font-size:14px;font-weight:700;color:var(--tx)}
 
 /* SECTION */
 .sec{margin-bottom:14px}
@@ -138,14 +145,8 @@ tr:hover td{background:#f8faff}
   </div>
 
   <!-- SUMMARY -->
-  <div class="sumbar" id="sumbar" style="display:none">
-    <div class="si2"><div class="sd2" style="background:var(--inter)"></div><div><div class="sl2">Inter</div><div class="sv" id="sv-i">0</div></div></div>
-    <div class="ssep"></div>
-    <div class="si2"><div class="sd2" style="background:var(--dmk)"></div><div><div class="sl2">DMK</div><div class="sv" id="sv-d">0</div></div></div>
-    <div class="ssep"></div>
-    <div class="si2"><div class="sd2" style="background:var(--green)"></div><div><div class="sl2">รวมกล่อง</div><div class="sv" id="sv-box">0</div></div></div>
-    <div class="ssep"></div>
-    <div class="si2"><div class="sd2" style="background:var(--tx)"></div><div><div class="sl2">รายการ</div><div class="sv" id="sv-total">0</div></div></div>
+  <div class="sumbar" id="sumbar" style="display:none" id="sumbar">
+    <!-- inject by JS -->
   </div>
 
   <!-- Loading -->
@@ -378,10 +379,36 @@ function hl(text, q) {
 }
 
 function updateSummary(rows) {
-  document.getElementById('sv-i').textContent=rows.filter(r=>r.carrier==='inter').length
-  document.getElementById('sv-d').textContent=rows.filter(r=>r.carrier==='dmk').length
-  document.getElementById('sv-total').textContent=rows.length
-  document.getElementById('sv-box').textContent=rows.reduce((s,r)=>s+(+r.quantity||0),0)
+  const sumbar = document.getElementById('sumbar')
+  const iRows = rows.filter(r=>r.carrier==='inter')
+  const dRows = rows.filter(r=>r.carrier==='dmk')
+  const totalBox = rows.reduce((s,r)=>s+(+r.quantity||0),0)
+  const hasSlot = rows.some(r=>r.session_slot)
+
+  // slot breakdown
+  const amBox = rows.filter(r=>r.session_slot==='เช้า').reduce((s,r)=>s+(+r.quantity||0),0)
+  const pmBox = rows.filter(r=>r.session_slot==='บ่าย').reduce((s,r)=>s+(+r.quantity||0),0)
+  const amCnt = rows.filter(r=>r.session_slot==='เช้า').length
+  const pmCnt = rows.filter(r=>r.session_slot==='บ่าย').length
+
+  let html = `<div class="sum-row">
+    <div class="si2"><div class="sd2" style="background:var(--inter)"></div><div><div class="sl2">Inter</div><div class="sv">${iRows.length}</div></div></div>
+    <div class="ssep"></div>
+    <div class="si2"><div class="sd2" style="background:var(--dmk)"></div><div><div class="sl2">DMK</div><div class="sv">${dRows.length}</div></div></div>
+    <div class="ssep"></div>
+    <div class="si2"><div class="sd2" style="background:var(--green)"></div><div><div class="sl2">รวมกล่อง</div><div class="sv">${totalBox}</div></div></div>
+    <div class="ssep"></div>
+    <div class="si2"><div class="sd2" style="background:var(--tx)"></div><div><div class="sl2">รายการ</div><div class="sv">${rows.length}</div></div></div>
+  </div>`
+
+  if (hasSlot) {
+    html += `<div class="sum-slot-row">`
+    if (amCnt) html += `<div class="sum-slot-item am"><span>☀️</span><div><div class="sum-slot-lbl">เช้า (${amCnt} ใบ)</div><div class="sum-slot-val">${amBox} กล่อง</div></div></div>`
+    if (pmCnt) html += `<div class="sum-slot-item pm"><span>🌙</span><div><div class="sum-slot-lbl">บ่าย (${pmCnt} ใบ)</div><div class="sum-slot-val">${pmBox} กล่อง</div></div></div>`
+    html += `</div>`
+  }
+
+  sumbar.innerHTML = html
 }
 
 function hideAll() {
