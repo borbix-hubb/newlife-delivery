@@ -212,10 +212,17 @@ app.post('/api/export', (req, res) => {
 })
 
 // ── START ──
-initDB().then(() => {
+async function startServer() {
   app.listen(PORT, () => console.log(`✅ NewLife Delivery OCR → http://localhost:${PORT}`))
-}).catch(e => {
-  console.error('DB init failed:', e.message)
-  // start anyway แม้ไม่มี DB (fallback)
-  app.listen(PORT, () => console.log(`⚠️ NewLife Delivery (no DB) → http://localhost:${PORT}`))
-})
+  // retry DB init ให้ postgres มีเวลา boot
+  for (let i = 1; i <= 10; i++) {
+    try {
+      await initDB()
+      break
+    } catch(e) {
+      console.log(`⏳ DB not ready (attempt ${i}/10): ${e.message}`)
+      await new Promise(r => setTimeout(r, 3000))
+    }
+  }
+}
+startServer()
