@@ -28,6 +28,15 @@ body{font-family:'Inter','Noto Sans Thai',sans-serif;background:var(--bg);color:
 
 .page{max-width:860px;margin:0 auto;padding:14px 12px}
 
+/* TABS */
+.tabs{display:flex;gap:6px;margin-bottom:10px;background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:8px}
+.tab{flex:1;padding:9px 10px;border-radius:10px;border:none;background:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--tx2);transition:.15s;white-space:nowrap}
+.tab:hover{background:var(--bg)}
+.tab:active{transform:scale(.96)}
+.tab.active{background:var(--tx);color:#fff}
+.tab.active.ti{background:linear-gradient(135deg,#0c4a6e,#0369a1)}
+.tab.active.td{background:linear-gradient(135deg,#4c1d95,#6d28d9)}
+
 /* DATE BAR */
 .date-bar{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .date-bar label{font-size:12px;font-weight:600;color:var(--tx2);white-space:nowrap}
@@ -144,8 +153,15 @@ tr:hover td{background:#f8faff}
     <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
   </div>
 
+  <!-- CARRIER TABS -->
+  <div class="tabs" id="tabs" style="display:none">
+    <button class="tab active" id="tabAll" onclick="setTab('all')">📦 ทั้งหมด</button>
+    <button class="tab" id="tabI" onclick="setTab('inter')">🚛 Inter</button>
+    <button class="tab" id="tabD" onclick="setTab('dmk')">🚚 DMK</button>
+  </div>
+
   <!-- SUMMARY -->
-  <div class="sumbar" id="sumbar" style="display:none" id="sumbar">
+  <div class="sumbar" id="sumbar" style="display:none">
     <!-- inject by JS -->
   </div>
 
@@ -189,11 +205,20 @@ tr:hover td{background:#f8faff}
 let allRows = { inter: [], dmk: [] }
 let searchQ = ''
 let searchMode = false
+let activeTab = 'all'  // 'all' | 'inter' | 'dmk'
 let sessionDate = new Date().toISOString().slice(0,10)
 let searchTimer = null
 
 document.getElementById('dateInput').value = sessionDate
 loadDate(sessionDate)
+
+function setTab(t) {
+  activeTab = t
+  document.getElementById('tabAll').className = 'tab'+(t==='all'?' active':'')
+  document.getElementById('tabI').className   = 'tab ti'+(t==='inter'?' active':'')
+  document.getElementById('tabD').className   = 'tab td'+(t==='dmk'?' active':'')
+  renderDay()
+}
 
 // ── DATE ──
 async function loadDate(date) {
@@ -254,15 +279,37 @@ function clearSearch() {
 function renderDay() {
   const hi = allRows.inter.length > 0
   const hd = allRows.dmk.length > 0
-  document.getElementById('secI').style.display = hi ? 'block' : 'none'
-  document.getElementById('secD').style.display = hd ? 'block' : 'none'
-  document.getElementById('emp').style.display = (!hi&&!hd) ? 'block' : 'none'
-  document.getElementById('sumbar').style.display = (hi||hd) ? 'flex' : 'none'
-  if (hi||hd) updateSummary([...allRows.inter,...allRows.dmk])
+  const hasAny = hi || hd
+
+  // tabs — แสดงเฉพาะที่มีข้อมูล
+  document.getElementById('tabs').style.display = hasAny ? 'flex' : 'none'
+  document.getElementById('tabI').style.display = hi ? 'flex' : 'none'
+  document.getElementById('tabD').style.display = hd ? 'flex' : 'none'
+
+  // ถ้า tab ที่เลือกไม่มีข้อมูล → reset เป็น all
+  if (activeTab==='inter' && !hi) activeTab='all'
+  if (activeTab==='dmk' && !hd) activeTab='all'
+  document.getElementById('tabAll').className = 'tab'+(activeTab==='all'?' active':'')
+  document.getElementById('tabI').className   = 'tab ti'+(activeTab==='inter'?' active':'')
+  document.getElementById('tabD').className   = 'tab td'+(activeTab==='dmk'?' active':'')
+
+  // filter ตาม tab
+  const showI = hasAny && (activeTab==='all' || activeTab==='inter') && hi
+  const showD = hasAny && (activeTab==='all' || activeTab==='dmk') && hd
+
+  document.getElementById('secI').style.display = showI ? 'block' : 'none'
+  document.getElementById('secD').style.display = showD ? 'block' : 'none'
+  document.getElementById('emp').style.display = !hasAny ? 'block' : 'none'
+
+  // summary — แสดงเฉพาะ tab ที่เลือก
+  const visRows = activeTab==='inter' ? allRows.inter : activeTab==='dmk' ? allRows.dmk : [...allRows.inter,...allRows.dmk]
+  if (hasAny) updateSummary(visRows)
+  else document.getElementById('sumbar').style.display='none'
+
   document.getElementById('cntI').textContent = allRows.inter.length+' รายการ'
   document.getElementById('cntD').textContent = allRows.dmk.length+' รายการ'
-  if (hi) renderCardSlot('inter', allRows.inter, 'thi')
-  if (hd) renderCardSlot('dmk', allRows.dmk, 'thd')
+  if (showI) renderCardSlot('inter', allRows.inter, 'thi')
+  if (showD) renderCardSlot('dmk', allRows.dmk, 'thd')
 }
 
 // ── RENDER CARD (with slot grouping) ──
@@ -300,28 +347,43 @@ function renderCardSlot(c, rowList, theadClass) {
 // ── RENDER SEARCH RESULTS (cross-date) ──
 function renderSearchResults(sRows, q) {
   if (!sRows.length) {
+    document.getElementById('tabs').style.display='none'
     document.getElementById('emp').style.display='block'
     document.getElementById('empTitle').textContent='ไม่พบผลการค้นหา "'+q+'"'
     document.getElementById('empSub').textContent='ลองใช้คำค้นอื่น'
     return
   }
-  updateSummary(sRows)
-  document.getElementById('sumbar').style.display='flex'
-  document.getElementById('emp').style.display='none'
-
   const iRows = sRows.filter(r=>r.carrier==='inter')
   const dRows = sRows.filter(r=>r.carrier==='dmk')
 
-  if (iRows.length) {
+  // แสดง tabs
+  document.getElementById('tabs').style.display='flex'
+  document.getElementById('tabI').style.display = iRows.length ? 'flex' : 'none'
+  document.getElementById('tabD').style.display = dRows.length ? 'flex' : 'none'
+  if (activeTab==='inter' && !iRows.length) activeTab='all'
+  if (activeTab==='dmk' && !dRows.length) activeTab='all'
+  document.getElementById('tabAll').className='tab'+(activeTab==='all'?' active':'')
+  document.getElementById('tabI').className='tab ti'+(activeTab==='inter'?' active':'')
+  document.getElementById('tabD').className='tab td'+(activeTab==='dmk'?' active':'')
+
+  const visRows = activeTab==='inter' ? iRows : activeTab==='dmk' ? dRows : sRows
+  updateSummary(visRows)
+  document.getElementById('emp').style.display='none'
+
+  const showI = (activeTab==='all'||activeTab==='inter') && iRows.length
+  const showD = (activeTab==='all'||activeTab==='dmk') && dRows.length
+
+  if (showI) {
     renderSearchCard('inter', iRows, 'thi')
     document.getElementById('secI').style.display='block'
-    document.getElementById('cntI').textContent=iRows.length+' รายการ (ทุกวัน)'
-  }
-  if (dRows.length) {
+    document.getElementById('cntI').textContent=iRows.length+' รายการ'
+  } else { document.getElementById('secI').style.display='none' }
+
+  if (showD) {
     renderSearchCard('dmk', dRows, 'thd')
     document.getElementById('secD').style.display='block'
-    document.getElementById('cntD').textContent=dRows.length+' รายการ (ทุกวัน)'
-  }
+    document.getElementById('cntD').textContent=dRows.length+' รายการ'
+  } else { document.getElementById('secD').style.display='none' }
 }
 
 function renderSearchCard(c, rowList, theadClass) {
@@ -412,6 +474,7 @@ function updateSummary(rows) {
 }
 
 function hideAll() {
+  document.getElementById('tabs').style.display='none'
   document.getElementById('secI').style.display='none'
   document.getElementById('secD').style.display='none'
   document.getElementById('emp').style.display='none'
