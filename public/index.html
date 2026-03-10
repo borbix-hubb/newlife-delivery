@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NewLife Delivery</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#16a34a;--green-l:#22c55e;--green-bg:#f0fdf4;--green-br:#bbf7d0;
+  --inter:#0ea5e9;--inter-bg:#f0f9ff;--inter-br:#bae6fd;
+  --dmk:#8b5cf6;--dmk-bg:#faf5ff;--dmk-br:#ddd6fe;
+  --red:#ef4444;--red-bg:#fef2f2;--red-br:#fca5a5;
+  --tx:#0f172a;--tx2:#475569;--tx3:#94a3b8;
+  --bd:#e2e8f0;--bg:#f8fafc;--wh:#fff;
+  --sh:0 1px 3px rgba(0,0,0,.08);--sh2:0 4px 20px rgba(0,0,0,.12);
+  --r:14px;--rs:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body{font-family:'Inter','Noto Sans Thai',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px;line-height:1.5;padding-bottom:90px}
+
+/* HEADER */
+.hdr{background:var(--wh);border-bottom:1px solid var(--bd);padding:0 16px;height:54px;display:flex;align-items:center;gap:11px;position:sticky;top:0;z-index:200;box-shadow:var(--sh)}
+.hdr-logo{width:34px;height:34px;background:linear-gradient(135deg,var(--green),var(--green-l));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.hdr h1{font-size:15px;font-weight:700;line-height:1.2}
+.hdr p{font-size:10px;color:var(--tx3)}
+.hdr-ai{margin-left:auto;background:var(--green-bg);color:var(--green);font-size:10px;font-weight:700;padding:4px 9px;border-radius:20px;border:1px solid var(--green-br);white-space:nowrap}
+
+/* PAGE */
+.page{max-width:860px;margin:0 auto;padding:14px 12px}
+
+/* ── CARRIER STRIP ── */
+.carrier-strip{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
+.cs{padding:12px 10px;border-radius:var(--rs);border:2.5px solid var(--bd);background:var(--wh);cursor:pointer;text-align:center;transition:.15s;font-family:inherit;-webkit-tap-highlight-color:transparent}
+.cs:active{transform:scale(.96)}
+.cs-ic{font-size:22px;margin-bottom:3px}
+.cs-name{font-size:14px;font-weight:700;color:var(--tx)}
+.cs-sub{font-size:10px;color:var(--tx3)}
+.cs.si{border-color:var(--inter);background:var(--inter-bg)}.cs.si .cs-name{color:#0369a1}
+.cs.sd{border-color:var(--dmk);background:var(--dmk-bg)}.cs.sd .cs-name{color:#6d28d9}
+
+/* ── ACTION BUTTONS (mobile-first) ── */
+.action-bar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.abtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px 10px;border-radius:var(--r);border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;transition:.15s;-webkit-tap-highlight-color:transparent;position:relative;overflow:hidden}
+.abtn:active{transform:scale(.95)}
+.abtn-ic{font-size:30px;line-height:1}
+.abtn-cam{background:linear-gradient(135deg,#0f172a,#1e40af);color:#fff;box-shadow:var(--sh2)}
+.abtn-gal{background:var(--wh);color:var(--tx2);border:2px solid var(--bd)}
+.abtn-gal:hover{background:#f8fafc;border-color:var(--tx3)}
+/* ripple */
+.abtn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.18);opacity:0;transition:opacity .2s}
+.abtn:active::after{opacity:1}
+/* hidden inputs */
+#fi,#ci{display:none}
+
+/* ── PENDING THUMBS ── */
+.pending-wrap{display:none;background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;box-shadow:var(--sh)}
+.pending-wrap.show{display:block}
+.pending-hd{font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.thumbs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.th{position:relative;width:60px;height:60px;border-radius:9px;overflow:hidden;border:2px solid var(--bd);flex-shrink:0}
+.th img{width:100%;height:100%;object-fit:cover}
+.th .tx{position:absolute;top:2px;right:2px;width:16px;height:16px;background:var(--red);color:#fff;border:none;border-radius:50%;font-size:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;-webkit-tap-highlight-color:transparent}
+.th-more{display:flex;align-items:center;justify-content:center;background:#f1f5f9;color:var(--tx2);font-size:11px;font-weight:700}
+.scan-row{display:flex;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:var(--rs);font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:.15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.btn:active{transform:scale(.96)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-dark{background:linear-gradient(135deg,#0f172a,#334155);color:#fff;flex:1;justify-content:center}
+.btn-ghost{background:var(--wh);border:1.5px solid var(--bd);color:var(--tx2)}
+.btn-green{background:linear-gradient(135deg,var(--green),var(--green-l));color:#fff}
+.btn-inter{background:linear-gradient(135deg,#0369a1,var(--inter));color:#fff}
+.btn-dmk{background:linear-gradient(135deg,#6d28d9,var(--dmk));color:#fff}
+.btn-danger{background:var(--wh);border:1.5px solid var(--red-br);color:var(--red)}
+.btn-full{width:100%;justify-content:center;padding:13px;font-size:14px}
+.btn:hover:not(:disabled){filter:brightness(1.07)}
+
+/* ── LOADING ── */
+.load-card{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:32px 20px;text-align:center;margin-bottom:14px}
+.spin{display:inline-block;width:36px;height:36px;border:3px solid var(--bd);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-card h3{font-size:15px;font-weight:600;margin-bottom:3px}
+.load-card p{font-size:12px;color:var(--tx3)}
+.prog{margin-top:14px;height:5px;background:var(--bd);border-radius:3px;overflow:hidden}
+.prog-f{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green),var(--green-l));transition:width .35s}
+
+/* ── SUMMARY ── */
+.sumbar{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.si2{display:flex;align-items:center;gap:8px}
+.sd2{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sl2{font-size:11px;color:var(--tx2)}
+.sv{font-size:17px;font-weight:700}
+.ssep{width:1px;height:30px;background:var(--bd)}
+
+/* ── SECTION ── */
+.sec{margin-bottom:14px}
+.sec-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.pill{padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700}
+.pill-i{background:var(--inter-bg);color:#0369a1;border:1px solid var(--inter-br)}
+.pill-d{background:var(--dmk-bg);color:#6d28d9;border:1px solid var(--dmk-br)}
+.sec-ttl{font-size:14px;font-weight:700}
+.sec-cnt{margin-left:auto;font-size:11px;color:var(--tx3);background:var(--bg);border:1px solid var(--bd);padding:3px 9px;border-radius:20px}
+
+/* ── TABLE ── */
+.card{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:620px}
+thead.thi th{background:#0369a1;color:#fff}
+thead.thd th{background:#6d28d9;color:#fff}
+th{padding:9px 8px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
+td{padding:5px 6px;border-bottom:1px solid #f8fafc;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafbff}
+/* inline cell */
+.cell-view{padding:5px 8px;border-radius:6px;cursor:pointer;font-size:12px;min-height:28px;display:flex;align-items:center;transition:.1s;word-break:break-word}
+.cell-view:hover,.cell-view:active{background:#f1f5f9}
+.cell-view.empty{color:var(--tx3);font-style:italic}
+.cell input,.cell select{width:100%;border:1.5px solid var(--inter);border-radius:6px;padding:5px 7px;font-size:12px;font-family:inherit;background:var(--wh);color:var(--tx);display:none;-webkit-appearance:none}
+.cell input:focus,.cell select:focus{outline:none;border-color:var(--green)}
+.cell.editing .cell-view{display:none}
+.cell.editing input,.cell.editing select{display:block}
+.badge-red{display:inline-block;background:var(--red-bg);color:var(--red);border:1px solid var(--red-br);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.badge-none{color:var(--tx3);font-size:12px}
+.td-no{width:34px;text-align:center;font-size:11px;font-weight:700;color:var(--tx3)}
+.td-qty{width:56px}
+.td-inv{width:115px}
+.td-red{width:82px}
+.td-act{width:64px;text-align:center}
+.act-btns{display:flex;gap:3px;justify-content:center}
+.edit-btn{background:none;border:1.5px solid var(--bd);border-radius:6px;cursor:pointer;color:var(--tx2);font-size:11px;padding:3px 7px;font-family:inherit;font-weight:600;transition:.15s;-webkit-tap-highlight-color:transparent}
+.edit-btn:active{transform:scale(.94)}
+.edit-btn.save{border-color:var(--green);color:var(--green)}
+.del-btn2{background:none;border:none;cursor:pointer;color:#fca5a5;font-size:16px;padding:3px 5px;border-radius:6px;line-height:1;-webkit-tap-highlight-color:transparent}
+.del-btn2:active{color:var(--red)}
+.add-row-btn{width:100%;padding:8px;background:none;border:none;border-top:1px dashed var(--bd);cursor:pointer;font-size:12px;font-family:inherit;transition:.15s}
+.add-row-btn.ai{color:var(--inter)}.add-row-btn.ai:active{background:var(--inter-bg)}
+.add-row-btn.ad{color:var(--dmk)}.add-row-btn.ad:active{background:var(--dmk-bg)}
+.tbl-ft{padding:10px 12px;background:var(--bg);border-top:1px solid var(--bd);display:flex;gap:8px;flex-wrap:wrap}
+
+/* ── DOCK ── */
+.dock{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--bd);padding:10px 14px;display:flex;gap:8px;flex-wrap:wrap;z-index:100;box-shadow:0 -2px 14px rgba(0,0,0,.08)}
+.dock.hide{display:none}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:52px 20px;color:var(--tx3)}
+.empty .ei{font-size:48px;margin-bottom:10px}
+.empty h2{font-size:15px;font-weight:600;color:var(--tx2);margin-bottom:5px}
+.empty p{font-size:12px;line-height:1.7}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:9px 18px;border-radius:100px;font-size:13px;font-weight:500;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s;z-index:999;box-shadow:var(--sh2)}
+.toast.show{opacity:1}
+
+/* ── DESKTOP extras ── */
+@media(min-width:601px){
+  .action-bar{grid-template-columns:1fr 1fr;max-width:440px}
+  .abtn{padding:20px 14px}
+  .abtn-ic{font-size:34px}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-logo">📦</div>
+  <div>
+    <h1>NewLife Delivery</h1>
+    <p>นิวไลฟ์ ฟาร์มา</p>
+  </div>
+  <div class="hdr-ai">🤖 AI OCR</div>
+</header>
+
+<div class="page">
+
+  <!-- 1. เลือกขนส่ง -->
+  <div class="carrier-strip">
+    <button class="cs si" id="csI" onclick="setCarrier('inter')">
+      <div class="cs-ic">🚛</div>
+      <div class="cs-name">Inter</div>
+      <div class="cs-sub">ขนส่ง Inter</div>
+    </button>
+    <button class="cs" id="csD" onclick="setCarrier('dmk')">
+      <div class="cs-ic">🚚</div>
+      <div class="cs-name">DMK</div>
+      <div class="cs-sub">ขนส่ง DMK</div>
+    </button>
+  </div>
+
+  <!-- 2. ปุ่มถ่ายรูป / อัปโหลด -->
+  <div class="action-bar">
+    <button class="abtn abtn-cam" onclick="document.getElementById('ci').click()">
+      <div class="abtn-ic">📷</div>
+      <span>ถ่ายรูป</span>
+    </button>
+    <button class="abtn abtn-gal" onclick="document.getElementById('fi').click()">
+      <div class="abtn-ic">🖼️</div>
+      <span>เลือกจากแกลเลอรี่</span>
+    </button>
+  </div>
+
+  <!-- hidden inputs -->
+  <input type="file" id="ci" accept="image/*" capture="environment">
+  <input type="file" id="fi" multiple accept="image/*">
+
+  <!-- 3. รูปที่รอสแกน -->
+  <div class="pending-wrap" id="pendingWrap">
+    <div class="pending-hd">
+      <span id="pendingLabel">📎 รูปที่รอสแกน</span>
+      <span id="pendingCount" style="font-size:11px;color:var(--tx3)"></span>
+    </div>
+    <div class="thumbs" id="thumbs"></div>
+    <div class="scan-row">
+      <button class="btn btn-dark" id="btnScan" onclick="scan()">🔍 สแกนด้วย AI</button>
+      <button class="btn btn-ghost" onclick="clearFiles()">✕</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="load-card" id="loadCard" style="display:none">
+    <div class="spin"></div>
+    <h3 id="loadT">กำลังอ่านใบนำส่ง...</h3>
+    <p id="loadS">Claude AI กำลังประมวลผลรูปภาพ</p>
+    <div class="prog"><div class="prog-f" id="pf" style="width:5%"></div></div>
+  </div>
+
+  <!-- Summary -->
+  <div class="sumbar" id="sumbar" style="display:none">
+    <div class="si2"><div class="sd2" style="background:var(--inter)"></div><div><div class="sl2">Inter</div><div class="sv" id="sv-i">0</div></div></div>
+    <div class="ssep"></div>
+    <div class="si2"><div class="sd2" style="background:var(--dmk)"></div><div><div class="sl2">DMK</div><div class="sv" id="sv-d">0</div></div></div>
+    <div class="ssep"></div>
+    <div class="si2"><div class="sd2" style="background:var(--green)"></div><div><div class="sl2">รวม</div><div class="sv" id="sv-a">0</div></div></div>
+  </div>
+
+  <!-- Inter table -->
+  <div class="sec" id="secI" style="display:none">
+    <div class="sec-hdr">
+      <span class="pill pill-i">🚛 Inter</span>
+      <span class="sec-ttl">ใบนำส่ง Inter</span>
+      <span class="sec-cnt" id="cntI">0</span>
+    </div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table>
+          <thead class="thi"><tr>
+            <th class="td-no">#</th>
+            <th>ชื่อ</th>
+            <th style="width:96px">จังหวัด</th>
+            <th class="td-qty" style="text-align:center">กล่อง</th>
+            <th class="td-inv">Invoice</th>
+            <th class="td-red">คาดแดง</th>
+            <th class="td-act">แก้ไข</th>
+          </tr></thead>
+          <tbody id="tbI"></tbody>
+        </table>
+        <button class="add-row-btn ai" onclick="addRow('inter')">＋ เพิ่มแถว</button>
+      </div>
+      <div class="tbl-ft">
+        <button class="btn btn-danger" onclick="clearRows('inter')">🗑️ เคลียร์ Inter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DMK table -->
+  <div class="sec" id="secD" style="display:none">
+    <div class="sec-hdr">
+      <span class="pill pill-d">🚚 DMK</span>
+      <span class="sec-ttl">ใบนำส่ง DMK</span>
+      <span class="sec-cnt" id="cntD">0</span>
+    </div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table>
+          <thead class="thd"><tr>
+            <th class="td-no">#</th>
+            <th>ชื่อ</th>
+            <th style="width:96px">จังหวัด</th>
+            <th class="td-qty" style="text-align:center">กล่อง</th>
+            <th class="td-inv">Invoice</th>
+            <th class="td-red">คาดแดง</th>
+            <th class="td-act">แก้ไข</th>
+          </tr></thead>
+          <tbody id="tbD"></tbody>
+        </table>
+        <button class="add-row-btn ad" onclick="addRow('dmk')">＋ เพิ่มแถว</button>
+      </div>
+      <div class="tbl-ft">
+        <button class="btn btn-danger" onclick="clearRows('dmk')">🗑️ เคลียร์ DMK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty -->
+  <div class="empty" id="emp">
+    <div class="ei">📦</div>
+    <h2>พร้อมใช้งาน</h2>
+    <p>① เลือกขนส่ง Inter หรือ DMK<br>② กด 📷 "ถ่ายรูป" — AI อ่านทันที<br>③ ข้อมูลสะสมในตาราง → กด Export</p>
+  </div>
+
+</div>
+
+<!-- Export dock -->
+<div class="dock hide" id="dock">
+  <button class="btn btn-inter" id="dI" onclick="exportExcel('inter')" style="display:none">📥 Export Inter</button>
+  <button class="btn btn-dmk" id="dD" onclick="exportExcel('dmk')" style="display:none">📥 Export DMK</button>
+  <button class="btn btn-green btn-full" id="dA" onclick="exportBoth()" style="display:none">📥 Export ทั้งหมด</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let files = []
+let carrier = 'inter'
+let rows = { inter: [], dmk: [] }
+let editingRow = { inter: -1, dmk: -1 }
+
+// ── CARRIER ──
+function setCarrier(c) {
+  carrier = c
+  document.getElementById('csI').className = 'cs' + (c==='inter' ? ' si' : '')
+  document.getElementById('csD').className = 'cs' + (c==='dmk' ? ' sd' : '')
+}
+
+// ── FILE INPUTS ──
+document.getElementById('ci').addEventListener('change', e => {
+  const f = [...e.target.files]
+  e.target.value = ''
+  if (!f.length) return
+  addFiles(f)
+  // ถ่ายรูปบนมือถือ: auto-scan ทันทีถ้ามี 1 รูป
+  if (f.length === 1) {
+    setTimeout(() => scan(), 100)
+  }
+})
+
+document.getElementById('fi').addEventListener('change', e => {
+  addFiles([...e.target.files])
+  e.target.value = ''
+})
+
+// drag & drop (desktop)
+document.addEventListener('dragover', e => e.preventDefault())
+document.addEventListener('drop', e => {
+  e.preventDefault()
+  const imgs = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'))
+  if (imgs.length) addFiles(imgs)
+})
+
+function addFiles(f) {
+  files = [...files, ...f]
+  renderThumbs()
+  showPending()
+}
+
+function renderThumbs() {
+  const c = document.getElementById('thumbs')
+  c.innerHTML = ''
+  files.slice(0, 8).forEach((f, i) => {
+    const url = URL.createObjectURL(f)
+    const d = document.createElement('div')
+    d.className = 'th'
+    d.innerHTML = `<img src="${url}" loading="lazy"><button class="tx" onclick="rmF(${i})">×</button>`
+    c.appendChild(d)
+  })
+  if (files.length > 8) {
+    const m = document.createElement('div')
+    m.className = 'th th-more'
+    m.textContent = `+${files.length - 8}`
+    c.appendChild(m)
+  }
+  document.getElementById('pendingCount').textContent = `${files.length} รูป`
+}
+
+function showPending() {
+  document.getElementById('pendingWrap').className = files.length ? 'pending-wrap show' : 'pending-wrap'
+}
+
+function rmF(i) {
+  files.splice(i, 1)
+  renderThumbs()
+  showPending()
+}
+
+function clearFiles() {
+  files = []
+  renderThumbs()
+  showPending()
+}
+
+// ── SCAN ──
+async function scan() {
+  if (!files.length) return
+  const btn = document.getElementById('btnScan')
+  btn.disabled = true
+  document.getElementById('loadCard').style.display = 'block'
+  document.getElementById('pendingWrap').className = 'pending-wrap'
+  document.getElementById('loadT').textContent = `กำลังอ่าน ${files.length} ใบ (${carrier === 'inter' ? 'Inter' : 'DMK'})...`
+  document.getElementById('loadS').textContent = 'Claude AI กำลังประมวลผลรูปภาพ'
+  document.getElementById('pf').style.width = '10%'
+
+  const fd = new FormData()
+  files.forEach(f => fd.append('images', f))
+
+  try {
+    document.getElementById('pf').style.width = '40%'
+    const res = await fetch('/api/ocr', { method: 'POST', body: fd })
+    document.getElementById('pf').style.width = '88%'
+    const data = await res.json()
+    document.getElementById('pf').style.width = '100%'
+
+    if (!data.ok) throw new Error(data.error)
+
+    rows[carrier] = [...rows[carrier], ...data.results]
+    files = []
+    renderAll()
+    showToast(`✅ เพิ่ม ${data.results.length} ใบ → ${carrier === 'inter' ? 'Inter' : 'DMK'}`)
+  } catch(e) {
+    showToast('❌ ' + e.message)
+    showPending()
+  }
+
+  document.getElementById('loadCard').style.display = 'none'
+  btn.disabled = false
+}
+
+// ── RENDER ALL ──
+function renderAll() {
+  renderTbl('inter'); renderTbl('dmk')
+  const hi = rows.inter.length > 0, hd = rows.dmk.length > 0
+  document.getElementById('secI').style.display = hi ? 'block' : 'none'
+  document.getElementById('secD').style.display = hd ? 'block' : 'none'
+  document.getElementById('emp').style.display = (!hi && !hd) ? 'block' : 'none'
+  document.getElementById('sumbar').style.display = (hi || hd) ? 'flex' : 'none'
+  document.getElementById('sv-i').textContent = rows.inter.length
+  document.getElementById('sv-d').textContent = rows.dmk.length
+  document.getElementById('sv-a').textContent = rows.inter.length + rows.dmk.length
+  document.getElementById('cntI').textContent = rows.inter.length + ' รายการ'
+  document.getElementById('cntD').textContent = rows.dmk.length + ' รายการ'
+  // dock
+  document.getElementById('dock').className = (hi || hd) ? 'dock' : 'dock hide'
+  document.getElementById('dI').style.display = hi ? 'inline-flex' : 'none'
+  document.getElementById('dD').style.display = hd ? 'inline-flex' : 'none'
+  document.getElementById('dA').style.display = (hi && hd) ? 'flex' : 'none'
+}
+
+// ── RENDER TABLE ──
+function renderTbl(c) {
+  const tbody = document.getElementById(c === 'inter' ? 'tbI' : 'tbD')
+  const eRow = editingRow[c]
+  tbody.innerHTML = ''
+  rows[c].forEach((r, i) => {
+    const ed = (i === eRow)
+    const tr = document.createElement('tr')
+
+    const mk = (id, val, type, placeholder, extraStyle='') => ed
+      ? `<div class="cell editing"><input id="${id}" type="${type}" value="${esc(String(val))}" placeholder="${placeholder}" style="${extraStyle}" oninput="rows['${c}'][${i}].${id.split('-')[1]}=this.value${type==='number'?'-0':''}"></div>`
+      : `<div class="cell"><div class="cell-view ${val?'':'empty'}" onclick="startEdit('${c}',${i})">${val||'<span style=\'color:var(--tx3)\'>-</span>'}</div></div>`
+
+    const shopV = ed
+      ? `<div class="cell editing"><input id="c-shop_name-${i}" value="${esc(r.shop_name)}" placeholder="ชื่อร้าน/รพ." oninput="rows['${c}'][${i}].shop_name=this.value"></div>`
+      : `<div class="cell"><div class="cell-view ${r.shop_name?'':'empty'}" onclick="startEdit('${c}',${i})">${r.shop_name||'<span style="color:var(--tx3)">-</span>'}</div></div>`
+
+    const provV = ed
+      ? `<div class="cell editing"><input value="${esc(r.province)}" placeholder="จังหวัด" oninput="rows['${c}'][${i}].province=this.value"></div>`
+      : `<div class="cell"><div class="cell-view ${r.province?'':'empty'}" onclick="startEdit('${c}',${i})">${r.province||'<span style="color:var(--tx3)">-</span>'}</div></div>`
+
+    const qtyV = ed
+      ? `<div class="cell editing"><input type="number" value="${r.quantity||0}" style="text-align:center" oninput="rows['${c}'][${i}].quantity=+this.value"></div>`
+      : `<div class="cell"><div class="cell-view" onclick="startEdit('${c}',${i})" style="justify-content:center;font-weight:600">${r.quantity||0}</div></div>`
+
+    const invV = ed
+      ? `<div class="cell editing"><input value="${esc(r.invoice_no)}" placeholder="IV..." oninput="rows['${c}'][${i}].invoice_no=this.value"></div>`
+      : `<div class="cell"><div class="cell-view ${r.invoice_no?'':'empty'}" onclick="startEdit('${c}',${i})">${r.invoice_no||'<span style="color:var(--tx3)">-</span>'}</div></div>`
+
+    const redV = ed
+      ? `<div class="cell editing"><select onchange="rows['${c}'][${i}].red_sticker=this.value==='red'"><option value="" ${!r.red_sticker?'selected':''}>-</option><option value="red" ${r.red_sticker?'selected':''}>🔴 คาดแดง</option></select></div>`
+      : `<div class="cell"><div class="cell-view" onclick="startEdit('${c}',${i})">${r.red_sticker?'<span class="badge-red">🔴 คาดแดง</span>':'<span class="badge-none">-</span>'}</div></div>`
+
+    const actV = ed
+      ? `<div class="act-btns"><button class="edit-btn save" onclick="saveEdit('${c}',${i})">✓</button></div>`
+      : `<div class="act-btns"><button class="edit-btn" onclick="startEdit('${c}',${i})">✏️</button><button class="del-btn2" onclick="delRow('${c}',${i})">×</button></div>`
+
+    tr.innerHTML = `
+      <td class="td-no">${i+1}</td>
+      <td>${shopV}</td>
+      <td>${provV}</td>
+      <td class="td-qty">${qtyV}</td>
+      <td class="td-inv">${invV}</td>
+      <td class="td-red">${redV}</td>
+      <td class="td-act">${actV}</td>
+    `
+    tbody.appendChild(tr)
+  })
+
+  // focus first input when editing
+  if (eRow >= 0) {
+    setTimeout(() => {
+      const inp = tbody.querySelector(`tr:nth-child(${eRow+1}) input`)
+      inp?.focus()
+    }, 40)
+  }
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;') }
+
+function startEdit(c, i) { editingRow[c] = i; renderTbl(c) }
+function saveEdit(c, i) { editingRow[c] = -1; renderTbl(c); showToast('✅ บันทึกแล้ว') }
+function delRow(c, i) { rows[c].splice(i,1); if(editingRow[c]>=rows[c].length) editingRow[c]=-1; renderAll() }
+function addRow(c) {
+  rows[c].push({ shop_name:'', province:'', invoice_no:'', quantity:0, red_sticker:false })
+  editingRow[c] = rows[c].length - 1
+  renderAll()
+}
+function clearRows(c) {
+  if (!confirm(`เคลียร์ ${c==='inter'?'Inter':'DMK'} ทั้งหมด?`)) return
+  rows[c] = []; editingRow[c] = -1; renderAll(); showToast('🗑️ เคลียร์แล้ว')
+}
+
+// ── EXPORT ──
+async function exportExcel(c) {
+  if (!rows[c].length) return showToast('ไม่มีข้อมูล')
+  await doExport(rows[c], c)
+}
+async function exportBoth() {
+  if (rows.inter.length) await doExport(rows.inter, 'inter')
+  if (rows.dmk.length) await doExport(rows.dmk, 'dmk')
+}
+async function doExport(r, c) {
+  try {
+    const res = await fetch('/api/export', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rows: r, carrier: c })
+    })
+    if (!res.ok) throw new Error('export failed')
+    const blob = await res.blob()
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `newlife_${c}_${new Date().toISOString().slice(0,10)}.xlsx`
+    a.click()
+    showToast(`📥 Export ${c==='inter'?'Inter':'DMK'} สำเร็จ!`)
+  } catch(e) { showToast('❌ ' + e.message) }
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast')
+  t.textContent = msg; t.classList.add('show')
+  setTimeout(() => t.classList.remove('show'), 2800)
+}
+</script>
+</body>
+</html>
