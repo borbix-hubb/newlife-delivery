@@ -205,6 +205,7 @@ tr:hover td{background:#f8faff}
 let allRows = { inter: [], dmk: [] }
 let searchQ = ''
 let searchMode = false
+let searchResults = []
 let activeTab = 'all'  // 'all' | 'inter' | 'dmk'
 let sessionDate = new Date().toISOString().slice(0,10)
 let searchTimer = null
@@ -214,10 +215,8 @@ loadDate(sessionDate)
 
 function setTab(t) {
   activeTab = t
-  document.getElementById('tabAll').className = 'tab'+(t==='all'?' active':'')
-  document.getElementById('tabI').className   = 'tab ti'+(t==='inter'?' active':'')
-  document.getElementById('tabD').className   = 'tab td'+(t==='dmk'?' active':'')
-  renderDay()
+  if (searchMode && searchResults.length) renderSearchResults(searchResults, searchQ)
+  else renderDay()
 }
 
 // ── DATE ──
@@ -263,7 +262,7 @@ async function doSearch(q) {
   try {
     const res = await fetch(`/api/rows/search?q=${encodeURIComponent(q)}`)
     const data = await res.json()
-    if (data.ok) renderSearchResults(data.rows, q)
+    if (data.ok) { searchResults = data.rows; renderSearchResults(data.rows, q) }
   } catch(e) { showToast('❌ ค้นหาไม่ได้') }
   document.getElementById('loadingDiv').style.display = 'none'
 }

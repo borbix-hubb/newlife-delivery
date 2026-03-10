@@ -524,7 +524,42 @@ function setTab(t) {
   document.getElementById('tabAll').className = 'tab'+(t==='all'?' active':'')
   document.getElementById('tabI').className   = 'tab ti'+(t==='inter'?' active':'')
   document.getElementById('tabD').className   = 'tab td'+(t==='dmk'?' active':'')
-  renderAll()
+  if (searchMode && searchResults.length) renderSearch(searchResults)
+  else renderAllNow()
+}
+
+function renderAllNow() {
+  const hi=rows.inter.length>0, hd=rows.dmk.length>0
+  const hasAny=hi||hd
+  document.getElementById('tabs').style.display=hasAny?'flex':'none'
+  document.getElementById('tabI').style.display=hi?'flex':'none'
+  document.getElementById('tabD').style.display=hd?'flex':'none'
+  if(activeTab==='inter'&&!hi) activeTab='all'
+  if(activeTab==='dmk'&&!hd) activeTab='all'
+  document.getElementById('tabAll').className='tab'+(activeTab==='all'?' active':'')
+  document.getElementById('tabI').className='tab ti'+(activeTab==='inter'?' active':'')
+  document.getElementById('tabD').className='tab td'+(activeTab==='dmk'?' active':'')
+
+  const showI=hasAny&&(activeTab==='all'||activeTab==='inter')&&hi
+  const showD=hasAny&&(activeTab==='all'||activeTab==='dmk')&&hd
+  document.getElementById('secI').style.display=showI?'block':'none'
+  document.getElementById('secD').style.display=showD?'block':'none'
+  document.getElementById('emp').style.display=!hasAny?'block':'none'
+
+  const visRows=activeTab==='inter'?rows.inter:activeTab==='dmk'?rows.dmk:[...rows.inter,...rows.dmk]
+  if(hasAny) renderSumbar(visRows)
+  else document.getElementById('sumbar').style.display='none'
+
+  const sc=(f,a)=>f.length!==a.length?`${f.length}/${a.length}`:`${a.length}`
+  document.getElementById('cntI').textContent=sc(filterRows(rows.inter),rows.inter)+' รายการ'
+  document.getElementById('cntD').textContent=sc(filterRows(rows.dmk),rows.dmk)+' รายการ'
+  if(showI) renderCard('inter',filterRows(rows.inter))
+  if(showD) renderCard('dmk',filterRows(rows.dmk))
+
+  document.getElementById('dock').className=hasAny?'dock':'dock hide'
+  document.getElementById('dI').style.display=hi?'inline-flex':'none'
+  document.getElementById('dD').style.display=hd?'inline-flex':'none'
+  document.getElementById('dA').style.display=(hi&&hd)?'flex':'none'
 }
 
 // ── CARRIER ──
@@ -634,40 +669,7 @@ function renderSumbar(allR) {
 
 function renderAll(){
   if (searchMode) return
-  const hi=rows.inter.length>0, hd=rows.dmk.length>0
-  const hasAny=hi||hd
-
-  // tabs
-  document.getElementById('tabs').style.display=hasAny?'flex':'none'
-  document.getElementById('tabI').style.display=hi?'flex':'none'
-  document.getElementById('tabD').style.display=hd?'flex':'none'
-  if(activeTab==='inter'&&!hi) activeTab='all'
-  if(activeTab==='dmk'&&!hd) activeTab='all'
-  document.getElementById('tabAll').className='tab'+(activeTab==='all'?' active':'')
-  document.getElementById('tabI').className='tab ti'+(activeTab==='inter'?' active':'')
-  document.getElementById('tabD').className='tab td'+(activeTab==='dmk'?' active':'')
-
-  const showI=hasAny&&(activeTab==='all'||activeTab==='inter')&&hi
-  const showD=hasAny&&(activeTab==='all'||activeTab==='dmk')&&hd
-  document.getElementById('secI').style.display=showI?'block':'none'
-  document.getElementById('secD').style.display=showD?'block':'none'
-  document.getElementById('emp').style.display=!hasAny?'block':'none'
-
-  const visRows=activeTab==='inter'?rows.inter:activeTab==='dmk'?rows.dmk:[...rows.inter,...rows.dmk]
-  if(hasAny) renderSumbar(visRows)
-  else document.getElementById('sumbar').style.display='none'
-
-  const sc=(f,a)=>f.length!==a.length?`${f.length}/${a.length}`:`${a.length}`
-  document.getElementById('cntI').textContent=sc(filterRows(rows.inter),rows.inter)+' รายการ'
-  document.getElementById('cntD').textContent=sc(filterRows(rows.dmk),rows.dmk)+' รายการ'
-  if(showI) renderCard('inter',filterRows(rows.inter))
-  if(showD) renderCard('dmk',filterRows(rows.dmk))
-
-  // dock
-  document.getElementById('dock').className=hasAny?'dock':'dock hide'
-  document.getElementById('dI').style.display=hi?'inline-flex':'none'
-  document.getElementById('dD').style.display=hd?'inline-flex':'none'
-  document.getElementById('dA').style.display=(hi&&hd)?'flex':'none'
+  renderAllNow()
 }
 
 function makeTbl(c, fRows, theadClass) {
