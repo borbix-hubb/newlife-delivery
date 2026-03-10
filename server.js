@@ -13,8 +13,8 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 // ── DB ──
 const dbUrl = process.env.DATABASE_URL || ''
-// Railway internal network ไม่ต้องการ SSL; external proxy ต้องการ
 const needSsl = dbUrl && !dbUrl.includes('railway.internal') && !dbUrl.includes('localhost')
+console.log(`DB URL host: ${dbUrl.split('@')[1]?.split('/')[0] || 'none'} | SSL: ${needSsl}`)
 const pool = new Pool({
   connectionString: dbUrl,
   ssl: needSsl ? { rejectUnauthorized: false } : false
