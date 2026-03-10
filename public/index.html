@@ -286,18 +286,34 @@ tr:hover td{background:#f8faff}
         <input type="file" id="importFile" accept=".xlsx,.xls" onchange="importExcel(this)">
         <div id="importStatus" style="margin-top:8px;font-size:11px;color:var(--tx3);text-align:center"></div>
       </div>
-      <!-- Export -->
+      <!-- Export วันนี้ -->
       <div>
         <div class="ie-box" style="cursor:default;pointer-events:none">
-          <div class="ie-ic">📥</div>
-          <div class="ie-title">Export Excel</div>
-          <div class="ie-sub">ดาวน์โหลดข้อมูลเป็น .xlsx</div>
+          <div class="ie-ic">📅</div>
+          <div class="ie-title">Export วันนี้</div>
+          <div class="ie-sub" id="exportDateLabel">วันที่ที่เลือก</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
-          <button class="btn btn-inter" style="justify-content:center;width:100%" onclick="exportExcel('inter')">📥 Export Inter</button>
-          <button class="btn btn-dmk" style="justify-content:center;width:100%" onclick="exportExcel('dmk')">📥 Export DMK</button>
-          <button class="btn btn-green" style="justify-content:center;width:100%" onclick="exportBoth()">📥 Export ทั้งหมด</button>
+          <button class="btn btn-inter" style="justify-content:center;width:100%" onclick="exportExcel('inter')">📥 Inter วันนี้</button>
+          <button class="btn btn-dmk" style="justify-content:center;width:100%" onclick="exportExcel('dmk')">📥 DMK วันนี้</button>
+          <button class="btn btn-green" style="justify-content:center;width:100%" onclick="exportBoth()">📥 ทั้งหมดวันนี้</button>
         </div>
+      </div>
+    </div>
+
+    <!-- Export by Month -->
+    <div style="border-top:1px solid var(--bd);margin:0 14px;padding:14px 0">
+      <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:10px;display:flex;align-items:center;gap:6px">
+        <span>🗓️</span> Export ทั้งเดือน
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px;background:var(--bg);border:1.5px solid var(--bd);border-radius:8px;padding:7px 10px">
+          <span style="font-size:12px;color:var(--tx2);white-space:nowrap">เดือน:</span>
+          <input type="month" id="monthInput" style="border:none;background:transparent;font-size:13px;font-family:inherit;color:var(--tx);outline:none">
+        </div>
+        <button class="btn btn-inter" onclick="exportMonth('inter')">📥 Inter</button>
+        <button class="btn btn-dmk" onclick="exportMonth('dmk')">📥 DMK</button>
+        <button class="btn btn-green" onclick="exportMonth('')">📥 ทั้งหมด</button>
       </div>
     </div>
   </div>
@@ -357,12 +373,16 @@ let sessionDate = new Date().toISOString().slice(0,10)
 let searchQ = ''
 
 document.getElementById('dateInput').value = sessionDate
+document.getElementById('monthInput').value = sessionDate.slice(0,7)
+document.getElementById('exportDateLabel').textContent = sessionDate
 loadDate(sessionDate)
 
 // ── DATE ──
 async function loadDate(date) {
   sessionDate = date
   document.getElementById('dateInput').value = date
+  document.getElementById('exportDateLabel').textContent = date
+  document.getElementById('monthInput').value = date.slice(0,7)
   editingRow = { inter:-1, dmk:-1 }
   try {
     const res = await fetch(`/api/rows?date=${date}`)
@@ -593,6 +613,25 @@ async function exportBoth(){
     a.href=URL.createObjectURL(blob);a.download=`newlife_all_${sessionDate}.xlsx`;a.click()
     showToast('📥 Export ทั้งหมดสำเร็จ')
   }catch(e){showToast('❌ '+e.message)}
+}
+
+// ── EXPORT MONTH ──
+async function exportMonth(c) {
+  const month = document.getElementById('monthInput').value
+  if (!month) return showToast('เลือกเดือนก่อนนะครับ')
+  const label = c || 'all'
+  const url = `/api/export/month?month=${month}${c ? '&carrier='+c : ''}`
+  try {
+    showToast(`⏳ กำลัง export เดือน ${month}...`)
+    const res = await fetch(url)
+    if (!res.ok) throw new Error('export failed')
+    const blob = await res.blob()
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `newlife_${label}_${month}.xlsx`
+    a.click()
+    showToast(`📥 Export เดือน ${month} สำเร็จ!`)
+  } catch(e) { showToast('❌ ' + e.message) }
 }
 
 function showToast(msg){

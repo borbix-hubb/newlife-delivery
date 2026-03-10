@@ -44,7 +44,7 @@ app.get('/view', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'view.html'))
 })
 
-// ── GET rows (วันนี้) ──
+// ── GET rows (by date) ──
 app.get('/api/rows', async (req, res) => {
   try {
     const date = req.query.date || new Date().toISOString().slice(0, 10)
@@ -53,6 +53,23 @@ app.get('/api/rows', async (req, res) => {
       [date]
     )
     res.json({ ok: true, rows: r.rows, date })
+  } catch (e) {
+    res.json({ ok: false, error: e.message })
+  }
+})
+
+// ── GET rows by month (YYYY-MM) ──
+app.get('/api/rows/month', async (req, res) => {
+  try {
+    const { month } = req.query // format: 2026-03
+    if (!month) return res.json({ ok: false, error: 'missing month' })
+    const r = await pool.query(
+      `SELECT * FROM delivery_rows
+       WHERE TO_CHAR(session_date, 'YYYY-MM') = $1
+       ORDER BY session_date, carrier, sort_order, id`,
+      [month]
+    )
+    res.json({ ok: true, rows: r.rows, month })
   } catch (e) {
     res.json({ ok: false, error: e.message })
   }
@@ -227,6 +244,60 @@ app.post('/api/export', (req, res) => {
   res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''newlife_${carrier}_${exportDate}.xlsx`)
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   res.send(buf)
+})
+
+// ── Export Excel by Month ──
+app.get('/api/export/month', async (req, res) => {
+  try {
+    const { month, carrier: filterCarrier } = req.query
+    if (!month) return res.status(400).send('missing month')
+
+    const r = await pool.query(
+      `SELECT * FROM delivery_rows
+       WHERE TO_CHAR(session_date, 'YYYY-MM') = $1
+       ${filterCarrier ? 'AND carrier = $2' : ''}
+       ORDER BY session_date, carrier, id`,
+      filterCarrier ? [month, filterCarrier] : [month]
+    )
+
+    const allRows = r.rows
+    const interRows = allRows.filter(x => x.carrier === 'inter')
+    const dmkRows   = allRows.filter(x => x.carrier === 'dmk')
+
+    const colW = [{ wch: 7 }, { wch: 12 }, { wch: 40 }, { wch: 16 }, { wch: 10 }, { wch: 20 }, { wch: 10 }]
+    const makeSheet = (rows) => {
+      const data = [
+        ['ลำดับ', 'วันที่', 'ชื่อร้านค้า / โรงพยาบาล / คลินิก', 'จังหวัด', 'กล่อง', 'Invoice', 'คาดแดง'],
+        ...rows.map((row, i) => [
+          i+1,
+          String(row.session_date).slice(0,10),
+          row.shop_name||'', row.province||'', row.quantity||0,
+          row.invoice_no||'', row.red_sticker ? 'คาดแดง' : ''
+        ])
+      ]
+      const ws = XLSX.utils.aoa_to_sheet(data)
+      ws['!cols'] = colW
+      return ws
+    }
+
+    const wb = XLSX.utils.book_new()
+    if (filterCarrier === 'inter') {
+      XLSX.utils.book_append_sheet(wb, makeSheet(interRows), '🚛 Inter')
+    } else if (filterCarrier === 'dmk') {
+      XLSX.utils.book_append_sheet(wb, makeSheet(dmkRows), '🚚 DMK')
+    } else {
+      if (interRows.length) XLSX.utils.book_append_sheet(wb, makeSheet(interRows), '🚛 Inter')
+      if (dmkRows.length)   XLSX.utils.book_append_sheet(wb, makeSheet(dmkRows),   '🚚 DMK')
+    }
+
+    const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' })
+    const label = filterCarrier || 'all'
+    res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''newlife_${label}_${month}.xlsx`)
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    res.send(buf)
+  } catch(e) {
+    res.status(500).send(e.message)
+  }
 })
 
 // ── Import Excel ──
