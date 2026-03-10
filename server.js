@@ -5,7 +5,7 @@ const Anthropic = require('@anthropic-ai/sdk')
 const XLSX = require('xlsx')
 
 const app = express()
-const PORT = 3100
+const PORT = process.env.PORT || 3100
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } })
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
