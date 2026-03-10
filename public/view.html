@@ -11,44 +11,44 @@
   --inter:#0ea5e9;--inter-bg:#f0f9ff;--inter-br:#bae6fd;
   --dmk:#8b5cf6;--dmk-bg:#faf5ff;--dmk-br:#ddd6fe;
   --red:#ef4444;--red-bg:#fef2f2;--red-br:#fca5a5;
+  --amber:#f59e0b;
   --tx:#0f172a;--tx2:#475569;--tx3:#94a3b8;
   --bd:#e2e8f0;--bg:#f8fafc;--wh:#fff;
-  --sh:0 1px 3px rgba(0,0,0,.08);
-  --r:14px;--rs:10px;
+  --sh:0 1px 3px rgba(0,0,0,.08);--r:14px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
 body{font-family:'Inter','Noto Sans Thai',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px;line-height:1.5}
 
-.hdr{background:var(--wh);border-bottom:1px solid var(--bd);padding:0 16px;height:54px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:var(--sh)}
+.hdr{background:linear-gradient(135deg,#0f172a,#1e3a5f);padding:0 16px;height:54px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.25)}
 .hdr-logo{width:34px;height:34px;background:linear-gradient(135deg,var(--green),var(--green-l));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.hdr h1{font-size:15px;font-weight:700}
-.hdr p{font-size:10px;color:var(--tx3)}
-.view-badge{margin-left:auto;background:var(--green-bg);color:var(--green);font-size:10px;font-weight:700;padding:4px 9px;border-radius:20px;border:1px solid var(--green-br);white-space:nowrap}
+.hdr h1{font-size:15px;font-weight:700;color:#fff}
+.hdr p{font-size:10px;color:rgba(255,255,255,.5)}
+.view-badge{margin-left:auto;background:rgba(34,197,94,.15);color:#86efac;font-size:10px;font-weight:700;padding:4px 9px;border-radius:20px;border:1px solid rgba(34,197,94,.25)}
 
 .page{max-width:860px;margin:0 auto;padding:14px 12px}
 
 /* DATE BAR */
-.date-bar{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.date-bar{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .date-bar label{font-size:12px;font-weight:600;color:var(--tx2);white-space:nowrap}
-.date-input{border:1.5px solid var(--bd);border-radius:8px;padding:7px 10px;font-size:13px;font-family:inherit;color:var(--tx);background:var(--wh);flex:1;min-width:140px;max-width:180px}
+.date-input{border:1.5px solid var(--bd);border-radius:8px;padding:6px 10px;font-size:13px;font-family:inherit;color:var(--tx);background:var(--wh);width:148px}
 .date-input:focus{outline:none;border-color:var(--green)}
-.date-nav{display:flex;gap:6px}
-.dnav{padding:7px 12px;border-radius:8px;border:1.5px solid var(--bd);background:var(--wh);font-size:12px;cursor:pointer;font-family:inherit;color:var(--tx2);transition:.15s}
-.dnav:hover{background:#f1f5f9}
-.dnav:active{transform:scale(.96)}
+.date-nav{display:flex;gap:5px}
+.dnav{padding:6px 10px;border-radius:8px;border:1.5px solid var(--bd);background:var(--wh);font-size:12px;cursor:pointer;font-family:inherit;color:var(--tx2);transition:.15s}
+.dnav:hover{background:#f1f5f9}.dnav:active{transform:scale(.96)}
 .dnav.today{background:var(--green);color:#fff;border-color:var(--green)}
 
 /* SEARCH */
-.search-bar{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.search-bar{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
 .search-icon{font-size:16px;flex-shrink:0;color:var(--tx3)}
 .search-input{flex:1;border:none;font-size:13px;font-family:inherit;color:var(--tx);outline:none;background:transparent}
 .search-input::placeholder{color:var(--tx3)}
 .search-clear{background:none;border:none;cursor:pointer;color:var(--tx3);font-size:16px;padding:2px;display:none}
 .search-clear.show{display:block}
+.search-hint{font-size:10px;color:var(--tx3);white-space:nowrap}
 
 /* SUMMARY */
-.sumbar{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sumbar{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .si2{display:flex;align-items:center;gap:8px}
 .sd2{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .sl2{font-size:11px;color:var(--tx2)}
@@ -68,26 +68,32 @@ body{font-family:'Inter','Noto Sans Thai',sans-serif;background:var(--bg);color:
 .card{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;min-width:380px}
-thead.thi th{background:#0369a1;color:#fff}
-thead.thd th{background:#6d28d9;color:#fff}
+thead.thi th{background:linear-gradient(90deg,#0c4a6e,#0369a1);color:#fff}
+thead.thd th{background:linear-gradient(90deg,#4c1d95,#6d28d9);color:#fff}
 th{padding:9px 10px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
 td{padding:8px 10px;border-bottom:1px solid #f8fafc;vertical-align:middle;font-size:13px}
 tr:last-child td{border-bottom:none}
-tr:nth-child(even) td{background:#fafbff}
+tr:hover td{background:#f8faff}
+.tr-red td{background:#fff5f5 !important}
 .td-no{width:36px;text-align:center;font-size:11px;font-weight:700;color:var(--tx3)}
 .td-qty{width:60px;text-align:center;font-weight:700}
 .td-inv{width:115px;font-family:monospace;font-size:12px;color:#0369a1}
 .td-red{width:85px}
 .badge-red{display:inline-block;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
-.tr-red td{background:#fff5f5 !important}
+.hl{background:#fef08a;border-radius:3px;padding:0 2px}
+.no-data{text-align:center;padding:44px 20px;color:var(--tx3);font-size:13px}
+
+/* SLOT HEADER */
 .slot-hdr{background:#f1f5f9;padding:7px 12px;font-size:11px;font-weight:700;color:var(--tx2);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:6px}
 .slot-hdr.am{border-left:3px solid var(--amber)}
 .slot-hdr.pm{border-left:3px solid var(--dmk)}
-.hl{background:#fef9c3;border-radius:3px;padding:0 2px}
-.no-data{text-align:center;padding:44px 20px;color:var(--tx3);font-size:13px}
+
+/* DATE GROUP (search mode) */
+.date-grp-hdr{background:#f1f5f9;padding:7px 12px;font-size:11px;font-weight:700;color:var(--tx2);border-bottom:1px solid var(--bd);border-left:3px solid var(--inter);display:flex;align-items:center;gap:6px}
+.date-grp-hdr.dmk{border-left-color:var(--dmk)}
 
 /* LOADING */
-.loading{text-align:center;padding:40px 20px;color:var(--tx3)}
+.loading{text-align:center;padding:36px 20px;color:var(--tx3)}
 .spin{display:inline-block;width:28px;height:28px;border:3px solid var(--bd);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:8px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -114,7 +120,7 @@ tr:nth-child(even) td{background:#fafbff}
 
   <!-- DATE BAR -->
   <div class="date-bar">
-    <label>📅 วันที่:</label>
+    <label>📅</label>
     <input type="date" class="date-input" id="dateInput" onchange="loadDate(this.value)">
     <div class="date-nav">
       <button class="dnav" onclick="changeDate(-1)">◀</button>
@@ -126,7 +132,8 @@ tr:nth-child(even) td{background:#fafbff}
   <!-- SEARCH -->
   <div class="search-bar">
     <span class="search-icon">🔍</span>
-    <input type="text" class="search-input" id="searchInput" placeholder="ค้นหาชื่อร้าน, จังหวัด, Invoice..." oninput="onSearch(this.value)">
+    <input type="text" class="search-input" id="searchInput" placeholder="ค้นหาข้ามทุกวัน — ชื่อร้าน, จังหวัด, Invoice..." oninput="onSearch(this.value)">
+    <span class="search-hint" id="searchHint" style="display:none">ข้ามวัน</span>
     <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
   </div>
 
@@ -153,21 +160,7 @@ tr:nth-child(even) td{background:#fafbff}
       <span class="sec-ttl">ใบนำส่ง Inter</span>
       <span class="sec-cnt" id="cntI"></span>
     </div>
-    <div class="card">
-      <div class="tbl-wrap">
-        <table>
-          <thead class="thi"><tr>
-            <th class="td-no">#</th>
-            <th>ชื่อร้านค้า / โรงพยาบาล / คลินิก</th>
-            <th style="width:90px">จังหวัด</th>
-            <th class="td-qty">กล่อง</th>
-            <th class="td-inv">Invoice</th>
-            <th class="td-red">คาดแดง</th>
-          </tr></thead>
-          <tbody id="tbI"></tbody>
-        </table>
-      </div>
-    </div>
+    <div class="card" id="cardI"></div>
   </div>
 
   <!-- DMK -->
@@ -177,28 +170,14 @@ tr:nth-child(even) td{background:#fafbff}
       <span class="sec-ttl">ใบนำส่ง DMK</span>
       <span class="sec-cnt" id="cntD"></span>
     </div>
-    <div class="card">
-      <div class="tbl-wrap">
-        <table>
-          <thead class="thd"><tr>
-            <th class="td-no">#</th>
-            <th>ชื่อร้านค้า / โรงพยาบาล / คลินิก</th>
-            <th style="width:90px">จังหวัด</th>
-            <th class="td-qty">กล่อง</th>
-            <th class="td-inv">Invoice</th>
-            <th class="td-red">คาดแดง</th>
-          </tr></thead>
-          <tbody id="tbD"></tbody>
-        </table>
-      </div>
-    </div>
+    <div class="card" id="cardD"></div>
   </div>
 
   <!-- Empty -->
   <div class="empty" id="emp" style="display:none">
     <div class="ei">📋</div>
-    <h2>ไม่มีข้อมูลวันนี้</h2>
-    <p>ยังไม่มีการบันทึกใบนำส่งในวันที่นี้</p>
+    <h2 id="empTitle">ไม่มีข้อมูลวันนี้</h2>
+    <p id="empSub">ยังไม่มีการบันทึกใบนำส่งในวันที่นี้</p>
   </div>
 
 </div>
@@ -206,142 +185,215 @@ tr:nth-child(even) td{background:#fafbff}
 <div class="toast" id="toast"></div>
 
 <script>
-let rows = { inter: [], dmk: [] }
+let allRows = { inter: [], dmk: [] }
 let searchQ = ''
+let searchMode = false
 let sessionDate = new Date().toISOString().slice(0,10)
+let searchTimer = null
 
 document.getElementById('dateInput').value = sessionDate
 loadDate(sessionDate)
 
+// ── DATE ──
 async function loadDate(date) {
+  searchMode = false; searchQ = ''
+  document.getElementById('searchInput').value = ''
+  document.getElementById('searchClear').className = 'search-clear'
+  document.getElementById('searchHint').style.display = 'none'
   sessionDate = date
   document.getElementById('dateInput').value = date
   document.getElementById('loadingDiv').style.display = 'block'
-  document.getElementById('secI').style.display = 'none'
-  document.getElementById('secD').style.display = 'none'
-  document.getElementById('emp').style.display = 'none'
-  document.getElementById('sumbar').style.display = 'none'
+  hideAll()
   try {
     const res = await fetch(`/api/rows?date=${date}`)
     const data = await res.json()
     if (data.ok) {
-      rows.inter = data.rows.filter(r => r.carrier === 'inter')
-      rows.dmk   = data.rows.filter(r => r.carrier === 'dmk')
-      renderAll()
+      allRows.inter = data.rows.filter(r => r.carrier === 'inter')
+      allRows.dmk   = data.rows.filter(r => r.carrier === 'dmk')
+      renderDay()
     }
   } catch(e) { showToast('❌ โหลดไม่ได้') }
   document.getElementById('loadingDiv').style.display = 'none'
 }
-
 function changeDate(d) {
-  const dt = new Date(sessionDate); dt.setDate(dt.getDate() + d)
+  const dt = new Date(sessionDate); dt.setDate(dt.getDate()+d)
   loadDate(dt.toISOString().slice(0,10))
 }
 function goToday() { loadDate(new Date().toISOString().slice(0,10)) }
 
+// ── SEARCH ──
 function onSearch(q) {
-  searchQ = q.toLowerCase().trim()
+  searchQ = q.trim()
   document.getElementById('searchClear').className = q ? 'search-clear show' : 'search-clear'
-  renderAll()
+  document.getElementById('searchHint').style.display = q ? 'inline' : 'none'
+  clearTimeout(searchTimer)
+  if (!q) { searchMode=false; loadDate(sessionDate); return }
+  searchTimer = setTimeout(() => doSearch(q), 400)
+}
+async function doSearch(q) {
+  searchMode = true
+  document.getElementById('loadingDiv').style.display = 'block'
+  hideAll()
+  try {
+    const res = await fetch(`/api/rows/search?q=${encodeURIComponent(q)}`)
+    const data = await res.json()
+    if (data.ok) renderSearchResults(data.rows, q)
+  } catch(e) { showToast('❌ ค้นหาไม่ได้') }
+  document.getElementById('loadingDiv').style.display = 'none'
 }
 function clearSearch() {
-  searchQ = ''; document.getElementById('searchInput').value = ''
-  document.getElementById('searchClear').className = 'search-clear'
-  renderAll()
+  searchQ=''; searchMode=false
+  document.getElementById('searchInput').value=''
+  document.getElementById('searchClear').className='search-clear'
+  document.getElementById('searchHint').style.display='none'
+  loadDate(sessionDate)
 }
 
-function filter(r) {
-  if (!searchQ) return r
-  return r.filter(x =>
-    (x.shop_name||'').toLowerCase().includes(searchQ) ||
-    (x.province||'').toLowerCase().includes(searchQ) ||
-    (x.invoice_no||'').toLowerCase().includes(searchQ)
-  )
-}
-
-function hl(text) {
-  if (!searchQ || !text) return text || '-'
-  const e = searchQ.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')
-  return String(text).replace(new RegExp(`(${e})`,'gi'),'<span class="hl">$1</span>')
-}
-
-function renderAll() {
-  const fi = filter(rows.inter), fd = filter(rows.dmk)
-  const hi = rows.inter.length > 0, hd = rows.dmk.length > 0
-
+// ── RENDER DAY ──
+function renderDay() {
+  const hi = allRows.inter.length > 0
+  const hd = allRows.dmk.length > 0
   document.getElementById('secI').style.display = hi ? 'block' : 'none'
   document.getElementById('secD').style.display = hd ? 'block' : 'none'
-  document.getElementById('emp').style.display = (!hi && !hd) ? 'block' : 'none'
+  document.getElementById('emp').style.display = (!hi&&!hd) ? 'block' : 'none'
   document.getElementById('sumbar').style.display = (hi||hd) ? 'flex' : 'none'
-
-  document.getElementById('sv-i').textContent = rows.inter.length
-  document.getElementById('sv-d').textContent = rows.dmk.length
-  document.getElementById('sv-total').textContent = rows.inter.length + rows.dmk.length
-  document.getElementById('sv-box').textContent = [...rows.inter,...rows.dmk].reduce((s,r)=>s+(+r.quantity||0),0)
-
-  const showCnt = (f, all) => f.length !== all.length ? `${f.length}/${all.length} รายการ` : `${all.length} รายการ`
-  document.getElementById('cntI').textContent = showCnt(fi, rows.inter)
-  document.getElementById('cntD').textContent = showCnt(fd, rows.dmk)
-
-  renderTbl('inter', fi)
-  renderTbl('dmk', fd)
+  if (hi||hd) updateSummary([...allRows.inter,...allRows.dmk])
+  document.getElementById('cntI').textContent = allRows.inter.length+' รายการ'
+  document.getElementById('cntD').textContent = allRows.dmk.length+' รายการ'
+  if (hi) renderCardSlot('inter', allRows.inter, 'thi')
+  if (hd) renderCardSlot('dmk', allRows.dmk, 'thd')
 }
 
-function renderTbl(c, filtered) {
-  const container = document.getElementById(c==='inter'?'tbI':'tbD').closest('table').parentElement
-  const tableEl = document.getElementById(c==='inter'?'tbI':'tbD').closest('table')
-  const tbody = document.getElementById(c==='inter'?'tbI':'tbD')
-  tbody.innerHTML = ''
+// ── RENDER CARD (with slot grouping) ──
+function renderCardSlot(c, rowList, theadClass) {
+  const card = document.getElementById(c==='inter'?'cardI':'cardD')
+  card.innerHTML = ''
+  if (!rowList.length) { card.innerHTML='<div class="no-data">ไม่มีข้อมูล</div>'; return }
 
-  // ลบ slot headers เก่า
-  container.querySelectorAll('.slot-hdr').forEach(el => el.remove())
-
-  if (!filtered.length) {
-    const tr = document.createElement('tr')
-    tr.innerHTML = `<td colspan="6" class="no-data">${searchQ?'🔍 ไม่พบผลการค้นหา':'ไม่มีข้อมูล'}</td>`
-    tbody.appendChild(tr); return
-  }
-
-  const hasSlot = filtered.some(r => r.session_slot)
+  const hasSlot = rowList.some(r => r.session_slot)
   if (!hasSlot) {
-    filtered.forEach((r, i) => appendRow(tbody, r, i))
+    // ไม่มี slot — แสดงตารางเดียว
+    const wrap=document.createElement('div');wrap.className='tbl-wrap'
+    wrap.appendChild(buildTable(rowList, theadClass, 0))
+    card.appendChild(wrap)
     return
   }
 
   // แยก slot
-  const slots = ['เช้า','บ่าย',null]
-  let seqNo = 0
-  slots.forEach(slot => {
-    const g = filtered.filter(r => r.session_slot === slot)
+  let seq = 0
+  ;[['เช้า','am'],['บ่าย','pm'],[null,'']].forEach(([slot, cls]) => {
+    const g = rowList.filter(r => r.session_slot === slot)
     if (!g.length) return
-    // insert slot header before table
     const hdr = document.createElement('div')
-    if (slot==='เช้า') { hdr.className='slot-hdr am'; hdr.innerHTML='☀️ ส่งตอนเช้า <span style="font-weight:400;color:var(--tx3)">('+g.length+' รายการ)</span>' }
-    else if (slot==='บ่าย') { hdr.className='slot-hdr pm'; hdr.innerHTML='🌙 ส่งตอนบ่าย <span style="font-weight:400;color:var(--tx3)">('+g.length+' รายการ)</span>' }
-    else { hdr.className='slot-hdr'; hdr.innerHTML='📦 รายการ' }
-    tableEl.before(hdr)
-    g.forEach(r => { seqNo++; appendRow(tbody, r, seqNo-1) })
+    if (slot==='เช้า') { hdr.className='slot-hdr am'; hdr.innerHTML=`☀️ ส่งตอนเช้า <span style="font-weight:400;color:var(--tx3)">(${g.length} รายการ)</span>` }
+    else if (slot==='บ่าย') { hdr.className='slot-hdr pm'; hdr.innerHTML=`🌙 ส่งตอนบ่าย <span style="font-weight:400;color:var(--tx3)">(${g.length} รายการ)</span>` }
+    else { hdr.className='slot-hdr'; hdr.innerHTML=`📦 รายการ <span style="font-weight:400;color:var(--tx3)">(${g.length} รายการ)</span>` }
+    card.appendChild(hdr)
+    const wrap=document.createElement('div');wrap.className='tbl-wrap'
+    wrap.appendChild(buildTable(g, theadClass, seq))
+    card.appendChild(wrap)
+    seq += g.length
   })
 }
 
-function appendRow(tbody, r, i) {
-  const tr = document.createElement('tr')
-  if (r.red_sticker) tr.className = 'tr-red'
-  tr.innerHTML = `
-    <td class="td-no">${i+1}</td>
-    <td style="font-weight:500">${hl(r.shop_name)||'-'}</td>
-    <td style="color:var(--tx2)">${hl(r.province)||'-'}</td>
-    <td class="td-qty">${r.quantity||0}</td>
-    <td class="td-inv">${hl(r.invoice_no)||'-'}</td>
-    <td class="td-red">${r.red_sticker?'<span class="badge-red">🔴 คาดแดง</span>':'-'}</td>
-  `
-  tbody.appendChild(tr)
+// ── RENDER SEARCH RESULTS (cross-date) ──
+function renderSearchResults(sRows, q) {
+  if (!sRows.length) {
+    document.getElementById('emp').style.display='block'
+    document.getElementById('empTitle').textContent='ไม่พบผลการค้นหา "'+q+'"'
+    document.getElementById('empSub').textContent='ลองใช้คำค้นอื่น'
+    return
+  }
+  updateSummary(sRows)
+  document.getElementById('sumbar').style.display='flex'
+  document.getElementById('emp').style.display='none'
+
+  const iRows = sRows.filter(r=>r.carrier==='inter')
+  const dRows = sRows.filter(r=>r.carrier==='dmk')
+
+  if (iRows.length) {
+    renderSearchCard('inter', iRows, 'thi')
+    document.getElementById('secI').style.display='block'
+    document.getElementById('cntI').textContent=iRows.length+' รายการ (ทุกวัน)'
+  }
+  if (dRows.length) {
+    renderSearchCard('dmk', dRows, 'thd')
+    document.getElementById('secD').style.display='block'
+    document.getElementById('cntD').textContent=dRows.length+' รายการ (ทุกวัน)'
+  }
+}
+
+function renderSearchCard(c, rowList, theadClass) {
+  const card = document.getElementById(c==='inter'?'cardI':'cardD')
+  card.innerHTML = ''
+  // group by date
+  const byDate = {}
+  rowList.forEach(r => {
+    const dt = String(r.session_date).slice(0,10)
+    if (!byDate[dt]) byDate[dt] = []
+    byDate[dt].push(r)
+  })
+  let seq=0
+  Object.keys(byDate).sort().reverse().forEach(dt => {
+    const g=byDate[dt]
+    const hdr=document.createElement('div')
+    hdr.className='date-grp-hdr'+(c==='dmk'?' dmk':'')
+    hdr.innerHTML=`📅 ${dt} <span style="font-weight:400;color:var(--tx3)">(${g.length} รายการ)</span>`
+    card.appendChild(hdr)
+    const wrap=document.createElement('div');wrap.className='tbl-wrap'
+    wrap.appendChild(buildTable(g,theadClass,seq))
+    card.appendChild(wrap)
+    seq+=g.length
+  })
+}
+
+// ── BUILD TABLE ──
+function buildTable(rowList, theadClass, startSeq) {
+  const q = searchQ.toLowerCase()
+  const tbl=document.createElement('table')
+  const thead=document.createElement('thead');thead.className=theadClass
+  thead.innerHTML=`<tr><th class="td-no">#</th><th>ชื่อร้านค้า / รพ. / คลินิก</th><th style="width:90px">จังหวัด</th><th class="td-qty">กล่อง</th><th class="td-inv">Invoice</th><th class="td-red">คาดแดง</th></tr>`
+  const tbody=document.createElement('tbody')
+  rowList.forEach((r,i) => {
+    const tr=document.createElement('tr')
+    if (r.red_sticker) tr.className='tr-red'
+    tr.innerHTML=`
+      <td class="td-no">${startSeq+i+1}</td>
+      <td style="font-weight:500">${hl(r.shop_name,q)||'-'}</td>
+      <td style="color:var(--tx2)">${hl(r.province,q)||'-'}</td>
+      <td class="td-qty">${r.quantity||0}</td>
+      <td class="td-inv">${hl(r.invoice_no,q)||'-'}</td>
+      <td class="td-red">${r.red_sticker?'<span class="badge-red">🔴 คาดแดง</span>':'-'}</td>
+    `
+    tbody.appendChild(tr)
+  })
+  tbl.appendChild(thead);tbl.appendChild(tbody)
+  return tbl
+}
+
+function hl(text, q) {
+  if (!q||!text) return text||''
+  const e=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')
+  return String(text).replace(new RegExp(`(${e})`,'gi'),'<span class="hl">$1</span>')
+}
+
+function updateSummary(rows) {
+  document.getElementById('sv-i').textContent=rows.filter(r=>r.carrier==='inter').length
+  document.getElementById('sv-d').textContent=rows.filter(r=>r.carrier==='dmk').length
+  document.getElementById('sv-total').textContent=rows.length
+  document.getElementById('sv-box').textContent=rows.reduce((s,r)=>s+(+r.quantity||0),0)
+}
+
+function hideAll() {
+  document.getElementById('secI').style.display='none'
+  document.getElementById('secD').style.display='none'
+  document.getElementById('emp').style.display='none'
+  document.getElementById('sumbar').style.display='none'
 }
 
 function showToast(msg) {
-  const t = document.getElementById('toast')
-  t.textContent = msg; t.classList.add('show')
-  setTimeout(() => t.classList.remove('show'), 2500)
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show')
+  setTimeout(()=>t.classList.remove('show'),2500)
 }
 </script>
 </body>

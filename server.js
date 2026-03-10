@@ -66,6 +66,26 @@ app.get('/api/rows', async (req, res) => {
   }
 })
 
+// ── Search rows across all dates ──
+app.get('/api/rows/search', async (req, res) => {
+  try {
+    const { q, carrier } = req.query
+    if (!q || q.trim().length < 1) return res.json({ ok: true, rows: [] })
+    const like = '%' + q.trim() + '%'
+    const r = await pool.query(
+      `SELECT * FROM delivery_rows
+       WHERE (shop_name ILIKE $1 OR province ILIKE $1 OR invoice_no ILIKE $1)
+       ${carrier ? 'AND carrier = $2' : ''}
+       ORDER BY session_date DESC, carrier, session_slot, sort_order, id
+       LIMIT 200`,
+      carrier ? [like, carrier] : [like]
+    )
+    res.json({ ok: true, rows: r.rows, query: q })
+  } catch (e) {
+    res.json({ ok: false, error: e.message })
+  }
+})
+
 // ── GET rows by month (YYYY-MM) ──
 app.get('/api/rows/month', async (req, res) => {
   try {
@@ -102,12 +122,12 @@ app.get('/api/sessions', async (req, res) => {
 // ── INSERT row ──
 app.post('/api/rows', async (req, res) => {
   try {
-    const { carrier, shop_name, province, invoice_no, quantity, red_sticker, session_date } = req.body
+    const { carrier, shop_name, province, invoice_no, quantity, red_sticker, session_date, session_slot } = req.body
     const date = session_date || new Date().toISOString().slice(0, 10)
     const r = await pool.query(
-      `INSERT INTO delivery_rows (session_date, carrier, shop_name, province, invoice_no, quantity, red_sticker)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-      [date, carrier, shop_name||'', province||'', invoice_no||'', quantity||0, red_sticker||false]
+      `INSERT INTO delivery_rows (session_date, carrier, shop_name, province, invoice_no, quantity, red_sticker, session_slot)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      [date, carrier, shop_name||'', province||'', invoice_no||'', quantity||0, red_sticker||false, session_slot||null]
     )
     res.json({ ok: true, row: r.rows[0] })
   } catch (e) {
@@ -160,6 +180,7 @@ app.post('/api/ocr', upload.array('images', 20), async (req, res) => {
 
     const carrier = req.body.carrier || 'inter'
     const session_date = req.body.session_date || new Date().toISOString().slice(0, 10)
+    const session_slot = req.body.session_slot || null
     const results = []
 
     for (const file of files) {
@@ -194,18 +215,17 @@ app.post('/api/ocr', upload.array('images', 20), async (req, res) => {
 
         // บันทึกลง DB เลย
         const dbRow = await pool.query(
-          `INSERT INTO delivery_rows (session_date, carrier, shop_name, province, invoice_no, quantity, red_sticker)
-           VALUES ($1,$2,$3,$4,$5,$6,false) RETURNING *`,
-          [session_date, carrier, data.shop_name, data.province, data.invoice_no, data.quantity]
+          `INSERT INTO delivery_rows (session_date, carrier, shop_name, province, invoice_no, quantity, red_sticker, session_slot)
+           VALUES ($1,$2,$3,$4,$5,$6,false,$7) RETURNING *`,
+          [session_date, carrier, data.shop_name, data.province, data.invoice_no, data.quantity, session_slot]
         )
         results.push(dbRow.rows[0])
       } catch (e) {
         console.error('OCR error:', e.message)
-        // บันทึก row ว่างเปล่าถ้า OCR fail
         const dbRow = await pool.query(
-          `INSERT INTO delivery_rows (session_date, carrier, shop_name, province, invoice_no, quantity, red_sticker)
-           VALUES ($1,$2,'','','',0,false) RETURNING *`,
-          [session_date, carrier]
+          `INSERT INTO delivery_rows (session_date, carrier, shop_name, province, invoice_no, quantity, red_sticker, session_slot)
+           VALUES ($1,$2,'','','',0,false,$3) RETURNING *`,
+          [session_date, carrier, session_slot]
         )
         results.push({ ...dbRow.rows[0], _error: 'อ่านไม่ได้' })
       }

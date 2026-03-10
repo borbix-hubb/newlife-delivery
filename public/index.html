@@ -163,6 +163,9 @@ tr:hover td{background:#f8faff}
 .cell.editing input,.cell.editing select{display:block}
 .badge-red{display:inline-block;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
 .tr-red td{background:#fff5f5 !important}
+.slot-btn{flex:1;padding:8px 10px;border-radius:8px;border:2px solid var(--bd);background:var(--bg);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;color:var(--tx2)}
+.slot-btn.active{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.slot-btn:active{transform:scale(.96)}
 .slot-hdr{background:#f1f5f9;padding:7px 12px;font-size:11px;font-weight:700;color:var(--tx2);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:6px}
 .slot-hdr.am{border-left:3px solid var(--amber)}
 .slot-hdr.pm{border-left:3px solid var(--dmk)}
@@ -248,6 +251,7 @@ tr:hover td{background:#f8faff}
   <!-- UPLOAD CARD -->
   <div class="card">
     <div class="card-hd"><span class="dot dot-green"></span>อัปโหลดใบนำส่งสินค้า</div>
+    <!-- Carrier -->
     <div class="cp-grid">
       <button class="cp si" id="cpI" onclick="setCarrier('inter')">
         <div class="cp-ic">🚛</div><div class="cp-name">Inter</div><div class="cp-sub">ขนส่ง Inter</div>
@@ -255,6 +259,12 @@ tr:hover td{background:#f8faff}
       <button class="cp" id="cpD" onclick="setCarrier('dmk')">
         <div class="cp-ic">🚚</div><div class="cp-name">DMK</div><div class="cp-sub">ขนส่ง DMK</div>
       </button>
+    </div>
+    <!-- Slot เช้า/บ่าย -->
+    <div style="display:flex;gap:8px;padding:0 14px 12px">
+      <button class="slot-btn" id="slotNone" onclick="setSlot(null)">📦 ไม่ระบุ</button>
+      <button class="slot-btn" id="slotAM" onclick="setSlot('เช้า')">☀️ เช้า</button>
+      <button class="slot-btn" id="slotPM" onclick="setSlot('บ่าย')">🌙 บ่าย</button>
     </div>
     <div class="action-grid">
       <button class="abtn abtn-cam" onclick="document.getElementById('ci').click()">
@@ -371,10 +381,12 @@ tr:hover td{background:#f8faff}
 <script>
 let files = []
 let carrier = 'inter'
+let sessionSlot = null  // null / 'เช้า' / 'บ่าย'
 let rows = { inter: [], dmk: [] }
 let editingRow = { inter: -1, dmk: -1 }
 let sessionDate = new Date().toISOString().slice(0,10)
 let searchQ = ''
+let searchMode = false  // true = search across all dates
 
 document.getElementById('dateInput').value = sessionDate
 document.getElementById('monthInput').value = sessionDate.slice(0,7)
@@ -405,21 +417,107 @@ function changeDate(d) {
 function goToday() { loadDate(new Date().toISOString().slice(0,10)) }
 
 // ── SEARCH ──
+let searchTimer = null
 function onSearch(q) {
-  searchQ = q.toLowerCase().trim()
+  searchQ = q.trim()
   document.getElementById('searchX').className = q ? 'search-x show' : 'search-x'
-  renderAll()
+  clearTimeout(searchTimer)
+  if (!q) { searchMode = false; renderAll(); return }
+  searchTimer = setTimeout(() => doSearch(q), 400)
 }
+
+async function doSearch(q) {
+  searchMode = true
+  document.getElementById('loadingDiv').style.display = 'block'
+  try {
+    const res = await fetch(`/api/rows/search?q=${encodeURIComponent(q)}`)
+    const data = await res.json()
+    if (data.ok) {
+      // จัดกลุ่มตามวันที่
+      searchResults = data.rows
+      renderSearch(data.rows)
+    }
+  } catch(e) {}
+  document.getElementById('loadingDiv').style.display = 'none'
+}
+
+let searchResults = []
+
+function renderSearch(sRows) {
+  // แสดงผลข้ามวัน แยกตาม session_date
+  const secI = document.getElementById('secI')
+  const secD = document.getElementById('secD')
+  const emp = document.getElementById('emp')
+  const sumbar = document.getElementById('sumbar')
+
+  if (!sRows.length) {
+    secI.style.display='none'; secD.style.display='none'
+    emp.style.display='block'; sumbar.style.display='none'
+    emp.querySelector('h2').textContent='ไม่พบผลการค้นหา'
+    return
+  }
+
+  // group by date + carrier
+  const byDate = {}
+  sRows.forEach(r => {
+    const dt = String(r.session_date).slice(0,10)
+    if (!byDate[dt]) byDate[dt] = { inter:[], dmk:[] }
+    byDate[dt][r.carrier]?.push(r)
+  })
+
+  const cardI = document.getElementById('cardI')
+  const cardD = document.getElementById('cardD')
+  cardI.innerHTML = ''; cardD.innerHTML = ''
+
+  const datesI = Object.keys(byDate).filter(d=>byDate[d].inter.length).sort().reverse()
+  const datesD = Object.keys(byDate).filter(d=>byDate[d].dmk.length).sort().reverse()
+
+  if (datesI.length) {
+    datesI.forEach(dt => {
+      const hdr = document.createElement('div')
+      hdr.className='slot-hdr am'
+      hdr.style.borderLeft='3px solid var(--inter)'
+      hdr.innerHTML=`📅 ${dt} &nbsp;<span style="font-weight:400;color:var(--tx3)">${byDate[dt].inter.length} รายการ</span>`
+      cardI.appendChild(hdr)
+      const wrap=document.createElement('div');wrap.className='tbl-wrap'
+      wrap.appendChild(makeTbl('inter',byDate[dt].inter,'thi'));cardI.appendChild(wrap)
+    })
+    secI.style.display='block'
+    document.getElementById('cntI').textContent=sRows.filter(r=>r.carrier==='inter').length+' รายการ'
+  } else { secI.style.display='none' }
+
+  if (datesD.length) {
+    datesD.forEach(dt => {
+      const hdr=document.createElement('div');hdr.className='slot-hdr'
+      hdr.style.borderLeft='3px solid var(--dmk)'
+      hdr.innerHTML=`📅 ${dt} &nbsp;<span style="font-weight:400;color:var(--tx3)">${byDate[dt].dmk.length} รายการ</span>`
+      cardD.appendChild(hdr)
+      const wrap=document.createElement('div');wrap.className='tbl-wrap'
+      wrap.appendChild(makeTbl('dmk',byDate[dt].dmk,'thd'));cardD.appendChild(wrap)
+    })
+    secD.style.display='block'
+    document.getElementById('cntD').textContent=sRows.filter(r=>r.carrier==='dmk').length+' รายการ'
+  } else { secD.style.display='none' }
+
+  emp.style.display='none'
+  const tot=sRows.reduce((s,r)=>s+(+r.quantity||0),0)
+  document.getElementById('sv-i').textContent=sRows.filter(r=>r.carrier==='inter').length
+  document.getElementById('sv-d').textContent=sRows.filter(r=>r.carrier==='dmk').length
+  document.getElementById('sv-all').textContent=sRows.length
+  document.getElementById('sv-box').textContent=tot
+  sumbar.style.display='flex'
+}
+
 function clearSearch() {
-  searchQ = ''; document.getElementById('searchInput').value = ''
-  document.getElementById('searchX').className = 'search-x'; renderAll()
+  searchQ=''; searchMode=false; searchResults=[]
+  document.getElementById('searchInput').value=''
+  document.getElementById('searchX').className='search-x'
+  loadDate(sessionDate)
 }
 function filterRows(r) {
-  if (!searchQ) return r
-  return r.filter(x =>
-    (x.shop_name||'').toLowerCase().includes(searchQ)||
-    (x.province||'').toLowerCase().includes(searchQ)||
-    (x.invoice_no||'').toLowerCase().includes(searchQ))
+  if (!searchQ || searchMode) return r
+  const q=searchQ.toLowerCase()
+  return r.filter(x=>(x.shop_name||'').toLowerCase().includes(q)||(x.province||'').toLowerCase().includes(q)||(x.invoice_no||'').toLowerCase().includes(q))
 }
 function hl(t) {
   if (!searchQ||!t) return t||'-'
@@ -432,6 +530,15 @@ function setCarrier(c) {
   document.getElementById('cpI').className = 'cp'+(c==='inter'?' si':'')
   document.getElementById('cpD').className = 'cp'+(c==='dmk'?' sd':'')
 }
+
+// ── SLOT ──
+function setSlot(s) {
+  sessionSlot = s
+  document.getElementById('slotNone').className = 'slot-btn'+(s===null?' active':'')
+  document.getElementById('slotAM').className   = 'slot-btn'+(s==='เช้า'?' active':'')
+  document.getElementById('slotPM').className   = 'slot-btn'+(s==='บ่าย'?' active':'')
+}
+setSlot(null)
 
 // ── FILES ──
 document.getElementById('ci').addEventListener('change', e => {
@@ -474,6 +581,7 @@ async function scanFiles(fl){
   document.getElementById('pf').style.width='10%'
   const fd=new FormData(); fl.forEach(f=>fd.append('images',f))
   fd.append('carrier',carrier); fd.append('session_date',sessionDate)
+  if(sessionSlot) fd.append('session_slot',sessionSlot)
   try{
     document.getElementById('pf').style.width='40%'
     const res=await fetch('/api/ocr',{method:'POST',body:fd})
@@ -590,9 +698,9 @@ async function delRow(c,i){
 }
 async function addRow(c){
   try{
-    const res=await fetch('/api/rows',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({carrier:c,session_date:sessionDate,shop_name:'',province:'',invoice_no:'',quantity:0,red_sticker:false})})
-    const data=await res.json();rows[c].push(data.ok?data.row:{shop_name:'',province:'',invoice_no:'',quantity:0,red_sticker:false})
-  }catch(e){rows[c].push({shop_name:'',province:'',invoice_no:'',quantity:0,red_sticker:false})}
+    const res=await fetch('/api/rows',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({carrier:c,session_date:sessionDate,shop_name:'',province:'',invoice_no:'',quantity:0,red_sticker:false,session_slot:sessionSlot})})
+    const data=await res.json();rows[c].push(data.ok?data.row:{shop_name:'',province:'',invoice_no:'',quantity:0,red_sticker:false,session_slot:sessionSlot})
+  }catch(e){rows[c].push({shop_name:'',province:'',invoice_no:'',quantity:0,red_sticker:false,session_slot:sessionSlot})}
   editingRow[c]=rows[c].length-1;renderAll()
 }
 async function clearRows(c){
