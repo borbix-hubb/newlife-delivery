@@ -300,6 +300,49 @@ app.get('/api/export/month', async (req, res) => {
   }
 })
 
+// ── Import from server-side file (one-time bulk import) ──
+app.post('/api/import-file', async (req, res) => {
+  try {
+    const { filename, carrier, secret } = req.body
+    if (secret !== (process.env.IMPORT_SECRET || 'newlife2026')) return res.json({ ok: false, error: 'unauthorized' })
+    const filePath = path.join(__dirname, filename)
+    const fs = require('fs')
+    if (!fs.existsSync(filePath)) return res.json({ ok: false, error: 'file not found: ' + filename })
+
+    function parseSheetDate(name) {
+      const clean = name.replace(/\(.*\)/g, '').trim()
+      const m = clean.match(/(\d+)\s*มี\.ค\./)
+      if (!m) return null
+      return '2026-03-' + String(m[1]).padStart(2, '0')
+    }
+
+    const XLSX2 = require('xlsx')
+    const wb = XLSX2.readFile(filePath)
+    let total = 0, skipped = 0, log = []
+
+    for (const sheetName of wb.SheetNames) {
+      const date = parseSheetDate(sheetName)
+      if (!date) { skipped++; continue }
+      const ws = wb.Sheets[sheetName]
+      const rows = XLSX2.utils.sheet_to_json(ws, { header: 1, defval: '' })
+      const dataRows = rows.filter(r => typeof r[0] === 'number' && r[0] > 0)
+      if (!dataRows.length) { skipped++; continue }
+      log.push(`${sheetName} → ${date} : ${dataRows.length} rows`)
+      for (const row of dataRows) {
+        await pool.query(
+          `INSERT INTO delivery_rows (session_date, carrier, shop_name, province, invoice_no, quantity, red_sticker)
+           VALUES ($1,$2,$3,$4,$5,$6,false)`,
+          [date, carrier || 'inter', String(row[1]||'').trim(), String(row[2]||'').trim(), String(row[4]||'').trim(), parseInt(row[3])||0]
+        )
+        total++
+      }
+    }
+    res.json({ ok: true, total, skipped, log })
+  } catch(e) {
+    res.json({ ok: false, error: e.message })
+  }
+})
+
 // ── Import Excel ──
 app.post('/api/import', upload.single('file'), async (req, res) => {
   try {
