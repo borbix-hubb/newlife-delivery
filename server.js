@@ -39,6 +39,11 @@ async function initDB() {
 app.use(express.json())
 app.use(express.static(path.join(__dirname, 'public')))
 
+// /view → view.html
+app.get('/view', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'view.html'))
+})
+
 // ── GET rows (วันนี้) ──
 app.get('/api/rows', async (req, res) => {
   try {
