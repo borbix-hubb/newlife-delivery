@@ -12,9 +12,13 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 // ── DB ──
+// Railway internal (postgres.railway.internal) = no SSL
+// External proxy (*.proxy.rlwy.net) = SSL required
+const dbUrl = process.env.DATABASE_URL || ''
+const isInternal = dbUrl.includes('railway.internal')
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+  connectionString: dbUrl,
+  ssl: isInternal ? false : (dbUrl ? { rejectUnauthorized: false } : false)
 })
 
 async function initDB() {
