@@ -327,16 +327,19 @@ document.getElementById('ci').addEventListener('change', e => {
   const f = [...e.target.files]
   e.target.value = ''
   if (!f.length) return
+  // ถ่ายรูปบนมือถือ: auto-scan ทันที ส่ง files ตรงๆ ไม่ผ่าน global
   addFiles(f)
-  // ถ่ายรูปบนมือถือ: auto-scan ทันทีถ้ามี 1 รูป
-  if (f.length === 1) {
-    setTimeout(() => scan(), 100)
-  }
+  scanFiles(f)
 })
 
 document.getElementById('fi').addEventListener('change', e => {
-  addFiles([...e.target.files])
+  const f = [...e.target.files]
   e.target.value = ''
+  if (!f.length) return
+  addFiles(f)
+  // gallery: ถ้า 1 รูปก็ auto-scan เลย ถ้าหลายรูปให้กดสแกนเอง
+  if (f.length === 1) scanFiles(f)
+  else showPending()
 })
 
 // drag & drop (desktop)
@@ -344,13 +347,12 @@ document.addEventListener('dragover', e => e.preventDefault())
 document.addEventListener('drop', e => {
   e.preventDefault()
   const imgs = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'))
-  if (imgs.length) addFiles(imgs)
+  if (imgs.length) { addFiles(imgs); showPending() }
 })
 
 function addFiles(f) {
   files = [...files, ...f]
   renderThumbs()
-  showPending()
 }
 
 function renderThumbs() {
@@ -389,34 +391,46 @@ function clearFiles() {
 }
 
 // ── SCAN ──
+// เรียกจากปุ่มสแกน (ใช้ global files)
 async function scan() {
   if (!files.length) return
+  await scanFiles([...files])
+}
+
+// core scan — รับ fileList ตรงๆ (ไม่พึ่ง global เพื่อหลีกเลี่ยง race condition)
+async function scanFiles(fileList) {
+  if (!fileList.length) return
   const btn = document.getElementById('btnScan')
   btn.disabled = true
   document.getElementById('loadCard').style.display = 'block'
   document.getElementById('pendingWrap').className = 'pending-wrap'
-  document.getElementById('loadT').textContent = `กำลังอ่าน ${files.length} ใบ (${carrier === 'inter' ? 'Inter' : 'DMK'})...`
+  document.getElementById('loadT').textContent = `กำลังอ่าน ${fileList.length} ใบ (${carrier === 'inter' ? 'Inter' : 'DMK'})...`
   document.getElementById('loadS').textContent = 'Claude AI กำลังประมวลผลรูปภาพ'
   document.getElementById('pf').style.width = '10%'
 
   const fd = new FormData()
-  files.forEach(f => fd.append('images', f))
+  fileList.forEach(f => fd.append('images', f))
 
   try {
     document.getElementById('pf').style.width = '40%'
     const res = await fetch('/api/ocr', { method: 'POST', body: fd })
     document.getElementById('pf').style.width = '88%'
+
+    if (!res.ok) throw new Error(`Server error ${res.status}`)
     const data = await res.json()
     document.getElementById('pf').style.width = '100%'
 
-    if (!data.ok) throw new Error(data.error)
+    if (!data.ok) throw new Error(data.error || 'AI อ่านไม่สำเร็จ')
 
+    // เพิ่มข้อมูลใหม่ต่อท้าย (สะสม)
     rows[carrier] = [...rows[carrier], ...data.results]
-    files = []
+    // ล้างเฉพาะ files ที่เพิ่งสแกนไป
+    files = files.filter(f => !fileList.includes(f))
+    renderThumbs()
     renderAll()
     showToast(`✅ เพิ่ม ${data.results.length} ใบ → ${carrier === 'inter' ? 'Inter' : 'DMK'}`)
   } catch(e) {
-    showToast('❌ ' + e.message)
+    showToast('❌ ' + (e.message || 'เกิดข้อผิดพลาด'))
     showPending()
   }
 
