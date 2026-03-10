@@ -32,9 +32,14 @@ async function initDB() {
       quantity INTEGER DEFAULT 0,
       red_sticker BOOLEAN DEFAULT FALSE,
       sort_order INTEGER DEFAULT 0,
+      session_slot VARCHAR(10) DEFAULT NULL,
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()
     )
+  `)
+  // เพิ่มคอลัมน์ session_slot ถ้ายังไม่มี (migration)
+  await pool.query(`
+    ALTER TABLE delivery_rows ADD COLUMN IF NOT EXISTS session_slot VARCHAR(10) DEFAULT NULL
   `)
   console.log('✅ DB ready')
 }
@@ -306,17 +311,31 @@ app.get('/api/export/month', async (req, res) => {
 // ── Import from server-side file (one-time bulk import) ──
 app.post('/api/import-file', async (req, res) => {
   try {
-    const { filename, carrier, secret } = req.body
+    const { filename, carrier, secret, delete_month } = req.body
     if (secret !== (process.env.IMPORT_SECRET || 'newlife2026')) return res.json({ ok: false, error: 'unauthorized' })
+
+    // ลบ data เก่าถ้าต้องการ
+    if (delete_month) {
+      const del = await pool.query(
+        `DELETE FROM delivery_rows WHERE TO_CHAR(session_date,'YYYY-MM')=$1 AND carrier=$2`,
+        [delete_month, carrier || 'inter']
+      )
+      console.log(`Deleted ${del.rowCount} rows for ${delete_month}`)
+    }
+
     const filePath = path.join(__dirname, filename)
     const fs = require('fs')
     if (!fs.existsSync(filePath)) return res.json({ ok: false, error: 'file not found: ' + filename })
 
-    function parseSheetDate(name) {
-      const clean = name.replace(/\(.*\)/g, '').trim()
-      const m = clean.match(/(\d+)\s*มี\.ค\./)
-      if (!m) return null
-      return '2026-03-' + String(m[1]).padStart(2, '0')
+    function parseSheet(name) {
+      // ดึงวันที่ + slot (เช้า/บ่าย/null)
+      const dayM = name.match(/(\d+)\s*มี\.ค\./)
+      if (!dayM) return null
+      const date = '2026-03-' + String(dayM[1]).padStart(2, '0')
+      let slot = null
+      if (name.includes('เช้า')) slot = 'เช้า'
+      else if (name.includes('บ่าย')) slot = 'บ่าย'
+      return { date, slot }
     }
 
     const XLSX2 = require('xlsx')
@@ -324,18 +343,28 @@ app.post('/api/import-file', async (req, res) => {
     let total = 0, skipped = 0, log = []
 
     for (const sheetName of wb.SheetNames) {
-      const date = parseSheetDate(sheetName)
-      if (!date) { skipped++; continue }
+      const parsed = parseSheet(sheetName)
+      if (!parsed) { skipped++; continue }
+      const { date, slot } = parsed
+
       const ws = wb.Sheets[sheetName]
       const rows = XLSX2.utils.sheet_to_json(ws, { header: 1, defval: '' })
       const dataRows = rows.filter(r => typeof r[0] === 'number' && r[0] > 0)
       if (!dataRows.length) { skipped++; continue }
-      log.push(`${sheetName} → ${date} : ${dataRows.length} rows`)
+      log.push(`${sheetName} → ${date}${slot ? ' ['+slot+']' : ''} : ${dataRows.length} rows`)
+
       for (const row of dataRows) {
+        // แยก invoice กับ คาดแดง ออกจากกัน
+        let rawNote = String(row[4]||'').trim()
+        let red_sticker = false
+        if (rawNote.includes('คาดแดง')) {
+          red_sticker = true
+          rawNote = rawNote.replace(/\s*คาดแดง\s*/g, '').trim()
+        }
         await pool.query(
-          `INSERT INTO delivery_rows (session_date, carrier, shop_name, province, invoice_no, quantity, red_sticker)
-           VALUES ($1,$2,$3,$4,$5,$6,false)`,
-          [date, carrier || 'inter', String(row[1]||'').trim(), String(row[2]||'').trim(), String(row[4]||'').trim(), parseInt(row[3])||0]
+          `INSERT INTO delivery_rows (session_date, carrier, shop_name, province, invoice_no, quantity, red_sticker, session_slot)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+          [date, carrier || 'inter', String(row[1]||'').trim(), String(row[2]||'').trim(), rawNote, parseInt(row[3])||0, red_sticker, slot]
         )
         total++
       }

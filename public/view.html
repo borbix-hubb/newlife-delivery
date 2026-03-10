@@ -78,7 +78,11 @@ tr:nth-child(even) td{background:#fafbff}
 .td-qty{width:60px;text-align:center;font-weight:700}
 .td-inv{width:115px;font-family:monospace;font-size:12px;color:#0369a1}
 .td-red{width:85px}
-.badge-red{display:inline-block;background:var(--red-bg);color:var(--red);border:1px solid var(--red-br);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.badge-red{display:inline-block;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.tr-red td{background:#fff5f5 !important}
+.slot-hdr{background:#f1f5f9;padding:7px 12px;font-size:11px;font-weight:700;color:var(--tx2);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:6px}
+.slot-hdr.am{border-left:3px solid var(--amber)}
+.slot-hdr.pm{border-left:3px solid var(--dmk)}
 .hl{background:#fef9c3;border-radius:3px;padding:0 2px}
 .no-data{text-align:center;padding:44px 20px;color:var(--tx3);font-size:13px}
 
@@ -284,25 +288,54 @@ function renderAll() {
 }
 
 function renderTbl(c, filtered) {
+  const container = document.getElementById(c==='inter'?'tbI':'tbD').closest('table').parentElement
+  const tableEl = document.getElementById(c==='inter'?'tbI':'tbD').closest('table')
   const tbody = document.getElementById(c==='inter'?'tbI':'tbD')
   tbody.innerHTML = ''
+
+  // ลบ slot headers เก่า
+  container.querySelectorAll('.slot-hdr').forEach(el => el.remove())
+
   if (!filtered.length) {
     const tr = document.createElement('tr')
     tr.innerHTML = `<td colspan="6" class="no-data">${searchQ?'🔍 ไม่พบผลการค้นหา':'ไม่มีข้อมูล'}</td>`
     tbody.appendChild(tr); return
   }
-  filtered.forEach((r, i) => {
-    const tr = document.createElement('tr')
-    tr.innerHTML = `
-      <td class="td-no">${i+1}</td>
-      <td style="font-weight:500">${hl(r.shop_name)||'-'}</td>
-      <td style="color:var(--tx2)">${hl(r.province)||'-'}</td>
-      <td class="td-qty">${r.quantity||0}</td>
-      <td class="td-inv">${hl(r.invoice_no)||'-'}</td>
-      <td class="td-red">${r.red_sticker?'<span class="badge-red">🔴 คาดแดง</span>':'-'}</td>
-    `
-    tbody.appendChild(tr)
+
+  const hasSlot = filtered.some(r => r.session_slot)
+  if (!hasSlot) {
+    filtered.forEach((r, i) => appendRow(tbody, r, i))
+    return
+  }
+
+  // แยก slot
+  const slots = ['เช้า','บ่าย',null]
+  let seqNo = 0
+  slots.forEach(slot => {
+    const g = filtered.filter(r => r.session_slot === slot)
+    if (!g.length) return
+    // insert slot header before table
+    const hdr = document.createElement('div')
+    if (slot==='เช้า') { hdr.className='slot-hdr am'; hdr.innerHTML='☀️ ส่งตอนเช้า <span style="font-weight:400;color:var(--tx3)">('+g.length+' รายการ)</span>' }
+    else if (slot==='บ่าย') { hdr.className='slot-hdr pm'; hdr.innerHTML='🌙 ส่งตอนบ่าย <span style="font-weight:400;color:var(--tx3)">('+g.length+' รายการ)</span>' }
+    else { hdr.className='slot-hdr'; hdr.innerHTML='📦 รายการ' }
+    tableEl.before(hdr)
+    g.forEach(r => { seqNo++; appendRow(tbody, r, seqNo-1) })
   })
+}
+
+function appendRow(tbody, r, i) {
+  const tr = document.createElement('tr')
+  if (r.red_sticker) tr.className = 'tr-red'
+  tr.innerHTML = `
+    <td class="td-no">${i+1}</td>
+    <td style="font-weight:500">${hl(r.shop_name)||'-'}</td>
+    <td style="color:var(--tx2)">${hl(r.province)||'-'}</td>
+    <td class="td-qty">${r.quantity||0}</td>
+    <td class="td-inv">${hl(r.invoice_no)||'-'}</td>
+    <td class="td-red">${r.red_sticker?'<span class="badge-red">🔴 คาดแดง</span>':'-'}</td>
+  `
+  tbody.appendChild(tr)
 }
 
 function showToast(msg) {

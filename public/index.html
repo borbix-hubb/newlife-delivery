@@ -161,7 +161,11 @@ tr:hover td{background:#f8faff}
 .cell input:focus,.cell select:focus{outline:none;border-color:var(--green)}
 .cell.editing .cell-view{display:none}
 .cell.editing input,.cell.editing select{display:block}
-.badge-red{display:inline-block;background:var(--red-bg);color:var(--red);border:1px solid var(--red-br);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.badge-red{display:inline-block;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.tr-red td{background:#fff5f5 !important}
+.slot-hdr{background:#f1f5f9;padding:7px 12px;font-size:11px;font-weight:700;color:var(--tx2);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:6px}
+.slot-hdr.am{border-left:3px solid var(--amber)}
+.slot-hdr.pm{border-left:3px solid var(--dmk)}
 .hl{background:#fef08a;border-radius:3px;padding:0 2px}
 .td-no{width:34px;text-align:center;font-size:11px;font-weight:700;color:var(--tx3)}
 .td-qty{width:56px;text-align:center}
@@ -509,34 +513,68 @@ function renderAll(){
   document.getElementById('dA').style.display=(hi&&hd)?'flex':'none'
 }
 
-function renderCard(c,fRows){
-  const card=document.getElementById(c==='inter'?'cardI':'cardD')
-  const eRow=editingRow[c]
-  if(!fRows.length){card.innerHTML=`<div class="no-data">${searchQ?'🔍 ไม่พบผลการค้นหา':'ไม่มีข้อมูล'}</div>`;return}
-  card.innerHTML=''
-  const wrap=document.createElement('div');wrap.className='tbl-wrap'
-  const tbl=document.createElement('table')
-  const thead=document.createElement('thead');thead.className=c==='inter'?'thi':'thd'
-  thead.innerHTML=`<tr><th class="td-no">#</th><th>ชื่อร้านค้า / รพ. / คลินิก</th><th style="width:90px">จังหวัด</th><th class="td-qty">กล่อง</th><th class="td-inv">Invoice</th><th class="td-redv">คาดแดง</th><th class="td-act"></th></tr>`
-  const tbody=document.createElement('tbody')
-  fRows.forEach(r=>{
-    const i=rows[c].indexOf(r), ed=i===eRow
-    const tr=document.createElement('tr')
-    const sv=(val,ph,key)=>ed?`<div class="cell editing"><input id="inp-${key}-${c}-${i}" value="${esc(val)}" placeholder="${ph}" oninput="rows['${c}'][${i}].${key}=this.value"></div>`:`<div class="cell"><div class="cell-view ${val?'':'empty'}" onclick="startEdit('${c}',${i})">${hl(val)||`<span style="color:var(--tx3)">-</span>`}</div></div>`
-    const sqty=ed?`<div class="cell editing"><input type="number" value="${r.quantity||0}" style="text-align:center" oninput="rows['${c}'][${i}].quantity=+this.value"></div>`:`<div class="cell"><div class="cell-view" onclick="startEdit('${c}',${i})" style="justify-content:center;font-weight:700">${r.quantity||0}</div></div>`
-    const sred=ed?`<div class="cell editing"><select onchange="rows['${c}'][${i}].red_sticker=this.value==='red'"><option value="" ${!r.red_sticker?'selected':''}>-</option><option value="red" ${r.red_sticker?'selected':''}>🔴 คาดแดง</option></select></div>`:`<div class="cell"><div class="cell-view" onclick="startEdit('${c}',${i})">${r.red_sticker?'<span class="badge-red">🔴 คาดแดง</span>':'<span style="color:var(--tx3)">-</span>'}</div></div>`
-    const sact=ed?`<div class="act-btns"><button class="edit-btn save" onclick="saveEdit('${c}',${i})">✓</button></div>`:`<div class="act-btns"><button class="edit-btn" onclick="startEdit('${c}',${i})">✏️</button><button class="del-btn" onclick="delRow('${c}',${i})">×</button></div>`
-    tr.innerHTML=`<td class="td-no">${i+1}</td><td>${sv(r.shop_name,'ชื่อร้าน','shop_name')}</td><td>${sv(r.province,'จังหวัด','province')}</td><td class="td-qty">${sqty}</td><td class="td-inv">${sv(r.invoice_no,'IV...','invoice_no')}</td><td class="td-redv">${sred}</td><td class="td-act">${sact}</td>`
+function makeTbl(c, fRows, theadClass) {
+  const eRow = editingRow[c]
+  const tbl = document.createElement('table')
+  const thead = document.createElement('thead'); thead.className = theadClass
+  thead.innerHTML = `<tr><th class="td-no">#</th><th>ชื่อร้านค้า / รพ. / คลินิก</th><th style="width:90px">จังหวัด</th><th class="td-qty">กล่อง</th><th class="td-inv">Invoice</th><th class="td-redv">คาดแดง</th><th class="td-act"></th></tr>`
+  const tbody = document.createElement('tbody')
+  fRows.forEach(r => {
+    const i = rows[c].indexOf(r), ed = i === eRow
+    const tr = document.createElement('tr')
+    if (r.red_sticker) tr.className = 'tr-red'
+    const sv = (val,ph,key) => ed
+      ? `<div class="cell editing"><input id="inp-${key}-${c}-${i}" value="${esc(val)}" placeholder="${ph}" oninput="rows['${c}'][${i}].${key}=this.value"></div>`
+      : `<div class="cell"><div class="cell-view ${val?'':'empty'}" onclick="startEdit('${c}',${i})">${hl(val)||`<span style="color:var(--tx3)">-</span>`}</div></div>`
+    const sqty = ed
+      ? `<div class="cell editing"><input type="number" value="${r.quantity||0}" style="text-align:center" oninput="rows['${c}'][${i}].quantity=+this.value"></div>`
+      : `<div class="cell"><div class="cell-view" onclick="startEdit('${c}',${i})" style="justify-content:center;font-weight:700">${r.quantity||0}</div></div>`
+    const sred = ed
+      ? `<div class="cell editing"><select onchange="rows['${c}'][${i}].red_sticker=this.value==='red'"><option value="" ${!r.red_sticker?'selected':''}>-</option><option value="red" ${r.red_sticker?'selected':''}>🔴 คาดแดง</option></select></div>`
+      : `<div class="cell"><div class="cell-view" onclick="startEdit('${c}',${i})">${r.red_sticker?'<span class="badge-red">🔴 คาดแดง</span>':'<span style="color:var(--tx3)">-</span>'}</div></div>`
+    const sact = ed
+      ? `<div class="act-btns"><button class="edit-btn save" onclick="saveEdit('${c}',${i})">✓</button></div>`
+      : `<div class="act-btns"><button class="edit-btn" onclick="startEdit('${c}',${i})">✏️</button><button class="del-btn" onclick="delRow('${c}',${i})">×</button></div>`
+    tr.innerHTML = `<td class="td-no">${i+1}</td><td>${sv(r.shop_name,'ชื่อร้าน','shop_name')}</td><td>${sv(r.province,'จังหวัด','province')}</td><td class="td-qty">${sqty}</td><td class="td-inv">${sv(r.invoice_no,'IV...','invoice_no')}</td><td class="td-redv">${sred}</td><td class="td-act">${sact}</td>`
     tbody.appendChild(tr)
   })
-  tbl.appendChild(thead);tbl.appendChild(tbody);wrap.appendChild(tbl)
-  const ab=document.createElement('button')
-  ab.className='add-row-btn '+(c==='inter'?'ai':'ad');ab.textContent='＋ เพิ่มแถว';ab.onclick=()=>addRow(c)
-  wrap.appendChild(ab);card.appendChild(wrap)
-  const ft=document.createElement('div');ft.className='tbl-ft'
-  ft.innerHTML=`<button class="btn btn-danger" onclick="clearRows('${c}')">🗑️ เคลียร์ ${c==='inter'?'Inter':'DMK'}</button>`
+  tbl.appendChild(thead); tbl.appendChild(tbody)
+  return tbl
+}
+
+function renderCard(c, fRows) {
+  const card = document.getElementById(c==='inter'?'cardI':'cardD')
+  const theadClass = c==='inter' ? 'thi' : 'thd'
+  if (!fRows.length) { card.innerHTML=`<div class="no-data">${searchQ?'🔍 ไม่พบผลการค้นหา':'ไม่มีข้อมูล'}</div>`; return }
+  card.innerHTML = ''
+
+  // แยก group: เช้า / บ่าย / ไม่มี slot
+  const hasSlot = fRows.some(r => r.session_slot)
+  if (hasSlot) {
+    const slots = ['เช้า', 'บ่าย', null]
+    slots.forEach(slot => {
+      const g = fRows.filter(r => r.session_slot === slot)
+      if (!g.length) return
+      const hdr = document.createElement('div')
+      if (slot === 'เช้า') { hdr.className='slot-hdr am'; hdr.innerHTML='☀️ ส่งตอนเช้า &nbsp;<span style="font-weight:400;color:var(--tx3)">('+g.length+' รายการ)</span>' }
+      else if (slot === 'บ่าย') { hdr.className='slot-hdr pm'; hdr.innerHTML='🌙 ส่งตอนบ่าย &nbsp;<span style="font-weight:400;color:var(--tx3)">('+g.length+' รายการ)</span>' }
+      else { hdr.className='slot-hdr'; hdr.innerHTML='📦 รายการ &nbsp;<span style="font-weight:400;color:var(--tx3)">('+g.length+' รายการ)</span>' }
+      card.appendChild(hdr)
+      const wrap = document.createElement('div'); wrap.className='tbl-wrap'
+      wrap.appendChild(makeTbl(c, g, theadClass)); card.appendChild(wrap)
+    })
+  } else {
+    const wrap = document.createElement('div'); wrap.className='tbl-wrap'
+    wrap.appendChild(makeTbl(c, fRows, theadClass)); card.appendChild(wrap)
+  }
+
+  const ab = document.createElement('button')
+  ab.className = 'add-row-btn '+(c==='inter'?'ai':'ad'); ab.textContent='＋ เพิ่มแถว'; ab.onclick=()=>addRow(c)
+  card.appendChild(ab)
+  const ft = document.createElement('div'); ft.className='tbl-ft'
+  ft.innerHTML = `<button class="btn btn-danger" onclick="clearRows('${c}')">🗑️ เคลียร์ ${c==='inter'?'Inter':'DMK'}</button>`
   card.appendChild(ft)
-  if(eRow>=0)setTimeout(()=>document.getElementById(`inp-shop_name-${c}-${eRow}`)?.focus(),40)
+  if (editingRow[c]>=0) setTimeout(()=>document.getElementById(`inp-shop_name-${c}-${editingRow[c]}`)?.focus(),40)
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
