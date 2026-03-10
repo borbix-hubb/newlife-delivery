@@ -42,6 +42,15 @@ body{font-family:'Inter','Noto Sans Thai',sans-serif;background:var(--bg);color:
 .dot-green{background:var(--green)}
 .dot-amber{background:var(--amber)}
 
+/* ── TABS ── */
+.tabs{display:flex;gap:6px;margin-bottom:14px;background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:8px}
+.tab{flex:1;padding:9px 10px;border-radius:10px;border:none;background:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--tx2);transition:.15s;white-space:nowrap}
+.tab:hover{background:var(--bg)}
+.tab:active{transform:scale(.96)}
+.tab.active{background:var(--tx);color:#fff}
+.tab.active.ti{background:linear-gradient(135deg,#0c4a6e,#0369a1)}
+.tab.active.td{background:linear-gradient(135deg,#4c1d95,#6d28d9)}
+
 /* ── DATE + SEARCH ROW ── */
 .top-row{display:grid;grid-template-columns:auto 1fr;gap:10px;margin-bottom:14px;align-items:stretch}
 @media(max-width:560px){.top-row{grid-template-columns:1fr}}
@@ -244,6 +253,13 @@ tr:hover td{background:#f8faff}
     </div>
   </div>
 
+  <!-- TABS -->
+  <div class="tabs" id="tabs" style="display:none">
+    <button class="tab active" id="tabAll" onclick="setTab('all')">📦 ทั้งหมด</button>
+    <button class="tab" id="tabI" onclick="setTab('inter')">🚛 Inter</button>
+    <button class="tab" id="tabD" onclick="setTab('dmk')">🚚 DMK</button>
+  </div>
+
   <!-- SUMMARY -->
   <div class="sumbar" id="sumbar" style="display:none"><!-- inject --></div>
 
@@ -288,46 +304,32 @@ tr:hover td{background:#f8faff}
   <!-- IMPORT / EXPORT CARD -->
   <div class="card">
     <div class="card-hd"><span class="dot dot-amber"></span>Import / Export Excel</div>
-    <div class="ie-grid">
+    <div style="padding:14px;display:flex;flex-direction:column;gap:14px">
+
       <!-- Import -->
       <div>
-        <div class="ie-box" onclick="triggerImport()">
-          <div class="ie-ic">📤</div>
-          <div class="ie-title">Import Excel</div>
-          <div class="ie-sub">นำเข้าข้อมูลจากไฟล์ .xlsx</div>
+        <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:8px">📤 Import Excel</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-ghost" onclick="triggerImport()">📤 เลือกไฟล์ .xlsx</button>
+          <div id="importStatus" style="font-size:11px;color:var(--tx3)"></div>
         </div>
         <input type="file" id="importFile" accept=".xlsx,.xls" onchange="importExcel(this)">
-        <div id="importStatus" style="margin-top:8px;font-size:11px;color:var(--tx3);text-align:center"></div>
       </div>
-      <!-- Export วันนี้ -->
-      <div>
-        <div class="ie-box" style="cursor:default;pointer-events:none">
-          <div class="ie-ic">📅</div>
-          <div class="ie-title">Export วันนี้</div>
-          <div class="ie-sub" id="exportDateLabel">วันที่ที่เลือก</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
-          <button class="btn btn-inter" style="justify-content:center;width:100%" onclick="exportExcel('inter')">📥 Inter วันนี้</button>
-          <button class="btn btn-dmk" style="justify-content:center;width:100%" onclick="exportExcel('dmk')">📥 DMK วันนี้</button>
-          <button class="btn btn-green" style="justify-content:center;width:100%" onclick="exportBoth()">📥 ทั้งหมดวันนี้</button>
-        </div>
-      </div>
-    </div>
 
-    <!-- Export by Month -->
-    <div style="border-top:1px solid var(--bd);margin:0 14px;padding:14px 0">
-      <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:10px;display:flex;align-items:center;gap:6px">
-        <span>🗓️</span> Export ทั้งเดือน
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <div style="display:flex;align-items:center;gap:6px;background:var(--bg);border:1.5px solid var(--bd);border-radius:8px;padding:7px 10px">
-          <span style="font-size:12px;color:var(--tx2);white-space:nowrap">เดือน:</span>
-          <input type="month" id="monthInput" style="border:none;background:transparent;font-size:13px;font-family:inherit;color:var(--tx);outline:none">
+      <!-- Export รายเดือน -->
+      <div style="border-top:1px dashed var(--bd);padding-top:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:10px">📥 Export รายเดือน</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:6px;background:var(--bg);border:1.5px solid var(--bd);border-radius:8px;padding:7px 10px">
+            <span style="font-size:12px;color:var(--tx2)">🗓️</span>
+            <input type="month" id="monthInput" style="border:none;background:transparent;font-size:13px;font-family:inherit;color:var(--tx);outline:none">
+          </div>
+          <button class="btn btn-inter" onclick="exportMonth('inter')">📥 Inter</button>
+          <button class="btn btn-dmk" onclick="exportMonth('dmk')">📥 DMK</button>
+          <button class="btn btn-green" onclick="exportMonth('')">📥 ทั้งหมด</button>
         </div>
-        <button class="btn btn-inter" onclick="exportMonth('inter')">📥 Inter</button>
-        <button class="btn btn-dmk" onclick="exportMonth('dmk')">📥 DMK</button>
-        <button class="btn btn-green" onclick="exportMonth('')">📥 ทั้งหมด</button>
       </div>
+
     </div>
   </div>
 
@@ -370,9 +372,9 @@ tr:hover td{background:#f8faff}
 
 <!-- Dock (shortcut export) -->
 <div class="dock hide" id="dock">
-  <button class="btn btn-inter" id="dI" onclick="exportExcel('inter')" style="display:none">📥 Inter</button>
-  <button class="btn btn-dmk" id="dD" onclick="exportExcel('dmk')" style="display:none">📥 DMK</button>
-  <button class="btn btn-green btn-full" id="dA" onclick="exportBoth()" style="display:none">📥 Export ทั้งหมด</button>
+  <button class="btn btn-inter" id="dI" onclick="exportMonth('inter')" style="display:none">📥 Inter เดือนนี้</button>
+  <button class="btn btn-dmk" id="dD" onclick="exportMonth('dmk')" style="display:none">📥 DMK เดือนนี้</button>
+  <button class="btn btn-green btn-full" id="dA" onclick="exportMonth('')" style="display:none">📥 ทั้งหมดเดือนนี้</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -380,23 +382,22 @@ tr:hover td{background:#f8faff}
 <script>
 let files = []
 let carrier = 'inter'
-let sessionSlot = null  // null / 'เช้า' / 'บ่าย'
+let sessionSlot = null
+let activeTab = 'all'
 let rows = { inter: [], dmk: [] }
 let editingRow = { inter: -1, dmk: -1 }
 let sessionDate = new Date().toISOString().slice(0,10)
 let searchQ = ''
-let searchMode = false  // true = search across all dates
+let searchMode = false
 
 document.getElementById('dateInput').value = sessionDate
 document.getElementById('monthInput').value = sessionDate.slice(0,7)
-document.getElementById('exportDateLabel').textContent = sessionDate
 loadDate(sessionDate)
 
 // ── DATE ──
 async function loadDate(date) {
   sessionDate = date
   document.getElementById('dateInput').value = date
-  document.getElementById('exportDateLabel').textContent = date
   document.getElementById('monthInput').value = date.slice(0,7)
   editingRow = { inter:-1, dmk:-1 }
   try {
@@ -464,42 +465,41 @@ function renderSearch(sRows) {
     byDate[dt][r.carrier]?.push(r)
   })
 
-  const cardI = document.getElementById('cardI')
-  const cardD = document.getElementById('cardD')
-  cardI.innerHTML = ''; cardD.innerHTML = ''
+  const iRows2=sRows.filter(r=>r.carrier==='inter')
+  const dRows2=sRows.filter(r=>r.carrier==='dmk')
 
-  const datesI = Object.keys(byDate).filter(d=>byDate[d].inter.length).sort().reverse()
-  const datesD = Object.keys(byDate).filter(d=>byDate[d].dmk.length).sort().reverse()
+  // tabs
+  document.getElementById('tabs').style.display='flex'
+  document.getElementById('tabI').style.display=iRows2.length?'flex':'none'
+  document.getElementById('tabD').style.display=dRows2.length?'flex':'none'
+  if(activeTab==='inter'&&!iRows2.length) activeTab='all'
+  if(activeTab==='dmk'&&!dRows2.length) activeTab='all'
+  document.getElementById('tabAll').className='tab'+(activeTab==='all'?' active':'')
+  document.getElementById('tabI').className='tab ti'+(activeTab==='inter'?' active':'')
+  document.getElementById('tabD').className='tab td'+(activeTab==='dmk'?' active':'')
 
-  if (datesI.length) {
-    datesI.forEach(dt => {
-      const hdr = document.createElement('div')
-      hdr.className='slot-hdr am'
-      hdr.style.borderLeft='3px solid var(--inter)'
-      hdr.innerHTML=`📅 ${dt} &nbsp;<span style="font-weight:400;color:var(--tx3)">${byDate[dt].inter.length} รายการ</span>`
-      cardI.appendChild(hdr)
-      const wrap=document.createElement('div');wrap.className='tbl-wrap'
-      wrap.appendChild(makeTbl('inter',byDate[dt].inter,'thi'));cardI.appendChild(wrap)
-    })
-    secI.style.display='block'
-    document.getElementById('cntI').textContent=sRows.filter(r=>r.carrier==='inter').length+' รายการ'
-  } else { secI.style.display='none' }
+  const visS=activeTab==='inter'?iRows2:activeTab==='dmk'?dRows2:sRows
+  renderSumbar(visS); emp.style.display='none'
 
-  if (datesD.length) {
-    datesD.forEach(dt => {
+  const showSI=(activeTab==='all'||activeTab==='inter')&&iRows2.length
+  const showSD=(activeTab==='all'||activeTab==='dmk')&&dRows2.length
+  secI.style.display=showSI?'block':'none'
+  secD.style.display=showSD?'block':'none'
+
+  const renderCrossCard=(c,cRows,thc)=>{
+    const card=document.getElementById(c==='inter'?'cardI':'cardD'); card.innerHTML=''
+    Object.keys(byDate).filter(d=>byDate[d][c].length).sort().reverse().forEach(dt=>{
       const hdr=document.createElement('div');hdr.className='slot-hdr'
-      hdr.style.borderLeft='3px solid var(--dmk)'
-      hdr.innerHTML=`📅 ${dt} &nbsp;<span style="font-weight:400;color:var(--tx3)">${byDate[dt].dmk.length} รายการ</span>`
-      cardD.appendChild(hdr)
+      hdr.style.borderLeft=`3px solid var(--${c})`
+      hdr.innerHTML=`📅 ${dt} <span style="font-weight:400;color:var(--tx3)">${byDate[dt][c].length} รายการ</span>`
+      card.appendChild(hdr)
       const wrap=document.createElement('div');wrap.className='tbl-wrap'
-      wrap.appendChild(makeTbl('dmk',byDate[dt].dmk,'thd'));cardD.appendChild(wrap)
+      wrap.appendChild(makeTbl(c,byDate[dt][c],thc));card.appendChild(wrap)
     })
-    secD.style.display='block'
-    document.getElementById('cntD').textContent=sRows.filter(r=>r.carrier==='dmk').length+' รายการ'
-  } else { secD.style.display='none' }
-
-  emp.style.display='none'
-  renderSumbar(sRows)
+    document.getElementById(c==='inter'?'cntI':'cntD').textContent=cRows.length+' รายการ'
+  }
+  if(showSI) renderCrossCard('inter',iRows2,'thi')
+  if(showSD) renderCrossCard('dmk',dRows2,'thd')
 }
 
 function clearSearch() {
@@ -516,6 +516,15 @@ function filterRows(r) {
 function hl(t) {
   if (!searchQ||!t) return t||'-'
   return String(t).replace(new RegExp(`(${searchQ.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<span class="hl">$1</span>')
+}
+
+// ── TABS ──
+function setTab(t) {
+  activeTab = t
+  document.getElementById('tabAll').className = 'tab'+(t==='all'?' active':'')
+  document.getElementById('tabI').className   = 'tab ti'+(t==='inter'?' active':'')
+  document.getElementById('tabD').className   = 'tab td'+(t==='dmk'?' active':'')
+  renderAll()
 }
 
 // ── CARRIER ──
@@ -624,20 +633,38 @@ function renderSumbar(allR) {
 }
 
 function renderAll(){
-  if (searchMode) return  // search mode — handled by renderSearch()
-  const fi=filterRows(rows.inter), fd=filterRows(rows.dmk)
+  if (searchMode) return
   const hi=rows.inter.length>0, hd=rows.dmk.length>0
-  document.getElementById('secI').style.display=hi?'block':'none'
-  document.getElementById('secD').style.display=hd?'block':'none'
-  document.getElementById('emp').style.display=(!hi&&!hd)?'block':'none'
-  if (hi||hd) renderSumbar([...rows.inter,...rows.dmk])
+  const hasAny=hi||hd
+
+  // tabs
+  document.getElementById('tabs').style.display=hasAny?'flex':'none'
+  document.getElementById('tabI').style.display=hi?'flex':'none'
+  document.getElementById('tabD').style.display=hd?'flex':'none'
+  if(activeTab==='inter'&&!hi) activeTab='all'
+  if(activeTab==='dmk'&&!hd) activeTab='all'
+  document.getElementById('tabAll').className='tab'+(activeTab==='all'?' active':'')
+  document.getElementById('tabI').className='tab ti'+(activeTab==='inter'?' active':'')
+  document.getElementById('tabD').className='tab td'+(activeTab==='dmk'?' active':'')
+
+  const showI=hasAny&&(activeTab==='all'||activeTab==='inter')&&hi
+  const showD=hasAny&&(activeTab==='all'||activeTab==='dmk')&&hd
+  document.getElementById('secI').style.display=showI?'block':'none'
+  document.getElementById('secD').style.display=showD?'block':'none'
+  document.getElementById('emp').style.display=!hasAny?'block':'none'
+
+  const visRows=activeTab==='inter'?rows.inter:activeTab==='dmk'?rows.dmk:[...rows.inter,...rows.dmk]
+  if(hasAny) renderSumbar(visRows)
   else document.getElementById('sumbar').style.display='none'
-  const sc=(f,a)=>f.length!==a.length?`${f.length}/${a.length} รายการ`:`${a.length} รายการ`
-  document.getElementById('cntI').textContent=sc(fi,rows.inter)
-  document.getElementById('cntD').textContent=sc(fd,rows.dmk)
-  renderCard('inter',fi); renderCard('dmk',fd)
-  const dock=document.getElementById('dock')
-  dock.className=(hi||hd)?'dock':'dock hide'
+
+  const sc=(f,a)=>f.length!==a.length?`${f.length}/${a.length}`:`${a.length}`
+  document.getElementById('cntI').textContent=sc(filterRows(rows.inter),rows.inter)+' รายการ'
+  document.getElementById('cntD').textContent=sc(filterRows(rows.dmk),rows.dmk)+' รายการ'
+  if(showI) renderCard('inter',filterRows(rows.inter))
+  if(showD) renderCard('dmk',filterRows(rows.dmk))
+
+  // dock
+  document.getElementById('dock').className=hasAny?'dock':'dock hide'
   document.getElementById('dI').style.display=hi?'inline-flex':'none'
   document.getElementById('dD').style.display=hd?'inline-flex':'none'
   document.getElementById('dA').style.display=(hi&&hd)?'flex':'none'
