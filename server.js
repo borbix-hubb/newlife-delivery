@@ -195,25 +195,92 @@ app.post('/api/ocr', upload.array('images', 20), async (req, res) => {
 
 // ── Export Excel ──
 app.post('/api/export', (req, res) => {
-  const { rows, carrier } = req.body
-  if (!rows?.length) return res.status(400).send('ไม่มีข้อมูล')
-
-  const carrierLabel = carrier === 'dmk' ? 'DMK' : 'Inter'
-  const data = [
-    ['ลำดับ', 'ชื่อ', 'จังหวัด', 'กล่อง', 'หมายเหตุ (Invoice)', 'คาดแดง'],
-    ...rows.map((r, i) => [i+1, r.shop_name||'', r.province||'', r.quantity||0, r.invoice_no||'', r.red_sticker ? 'คาดแดง' : ''])
-  ]
+  const { rows, carrier, inter, dmk, date } = req.body
+  const exportDate = date || new Date().toISOString().slice(0, 10)
+  const colWidths = [{ wch: 7 }, { wch: 40 }, { wch: 16 }, { wch: 10 }, { wch: 20 }, { wch: 10 }]
+  const makeSheet = (r) => {
+    const data = [
+      ['ลำดับ', 'ชื่อร้านค้า / โรงพยาบาล / คลินิก', 'จังหวัด', 'กล่อง', 'Invoice', 'คาดแดง'],
+      ...r.map((row, i) => [i+1, row.shop_name||'', row.province||'', row.quantity||0, row.invoice_no||'', row.red_sticker ? 'คาดแดง' : ''])
+    ]
+    const ws = XLSX.utils.aoa_to_sheet(data)
+    ws['!cols'] = colWidths
+    return ws
+  }
 
   const wb = XLSX.utils.book_new()
-  const ws = XLSX.utils.aoa_to_sheet(data)
-  ws['!cols'] = [{ wch: 7 }, { wch: 38 }, { wch: 16 }, { wch: 10 }, { wch: 18 }, { wch: 10 }]
-  XLSX.utils.book_append_sheet(wb, ws, `ใบนำส่ง ${carrierLabel}`)
 
+  // Export ทั้งหมด (Inter + DMK รวมกัน 2 sheet)
+  if (inter || dmk) {
+    if (inter?.length) XLSX.utils.book_append_sheet(wb, makeSheet(inter), '🚛 Inter')
+    if (dmk?.length)   XLSX.utils.book_append_sheet(wb, makeSheet(dmk),   '🚚 DMK')
+    const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' })
+    res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''newlife_all_${exportDate}.xlsx`)
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    return res.send(buf)
+  }
+
+  // Export แยก carrier
+  if (!rows?.length) return res.status(400).send('ไม่มีข้อมูล')
+  XLSX.utils.book_append_sheet(wb, makeSheet(rows), carrier === 'dmk' ? '🚚 DMK' : '🚛 Inter')
   const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' })
-  const date = new Date().toISOString().slice(0, 10)
-  res.setHeader('Content-Disposition', `attachment; filename="newlife_${carrier}_${date}.xlsx"`)
+  res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''newlife_${carrier}_${exportDate}.xlsx`)
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   res.send(buf)
+})
+
+// ── Import Excel ──
+app.post('/api/import', upload.single('file'), async (req, res) => {
+  try {
+    const { carrier, session_date } = req.body
+    if (!req.file) return res.json({ ok: false, error: 'ไม่มีไฟล์' })
+    if (!carrier || !session_date) return res.json({ ok: false, error: 'missing carrier/date' })
+
+    const wb = XLSX.read(req.file.buffer, { type: 'buffer' })
+    const ws = wb.Sheets[wb.SheetNames[0]]
+    const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' })
+
+    // หา header row (row ที่มี ชื่อ / ลำดับ)
+    let dataRows = raw.filter((row, i) => i > 0 && row.some(c => String(c).trim()))
+    // ลอง detect columns จาก header
+    const header = raw[0]?.map(c => String(c).toLowerCase().trim()) || []
+    const colIdx = {
+      shop:    header.findIndex(h => h.includes('ชื่อ') || h.includes('shop')),
+      province:header.findIndex(h => h.includes('จังหวัด') || h.includes('province')),
+      qty:     header.findIndex(h => h.includes('กล่อง') || h.includes('qty') || h.includes('quantity') || h.includes('ลัง')),
+      invoice: header.findIndex(h => h.includes('invoice') || h.includes('หมายเหตุ')),
+      red:     header.findIndex(h => h.includes('คาดแดง') || h.includes('red')),
+    }
+    // fallback index ถ้าไม่เจอ header
+    if (colIdx.shop < 0)     colIdx.shop = 1
+    if (colIdx.province < 0) colIdx.province = 2
+    if (colIdx.qty < 0)      colIdx.qty = 3
+    if (colIdx.invoice < 0)  colIdx.invoice = 4
+    if (colIdx.red < 0)      colIdx.red = 5
+
+    const inserted = []
+    for (const row of dataRows) {
+      const shop_name  = String(row[colIdx.shop]   || '').trim()
+      const province   = String(row[colIdx.province]|| '').trim()
+      const invoice_no = String(row[colIdx.invoice] || '').trim()
+      const quantity   = parseInt(row[colIdx.qty])  || 0
+      const red_sticker = String(row[colIdx.red]||'').includes('คาด') || String(row[colIdx.red]||'').toLowerCase().includes('red')
+
+      if (!shop_name && !invoice_no) continue // skip empty rows
+
+      const r = await pool.query(
+        `INSERT INTO delivery_rows (session_date, carrier, shop_name, province, invoice_no, quantity, red_sticker)
+         VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+        [session_date, carrier, shop_name, province, invoice_no, quantity, red_sticker]
+      )
+      inserted.push(r.rows[0])
+    }
+
+    res.json({ ok: true, inserted, count: inserted.length })
+  } catch(e) {
+    console.error('import error:', e)
+    res.json({ ok: false, error: e.message })
+  }
 })
 
 // ── START ──

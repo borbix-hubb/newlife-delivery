@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NewLife Delivery</title>
+<title>NewLife Delivery — Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -11,85 +11,108 @@
   --inter:#0ea5e9;--inter-bg:#f0f9ff;--inter-br:#bae6fd;
   --dmk:#8b5cf6;--dmk-bg:#faf5ff;--dmk-br:#ddd6fe;
   --red:#ef4444;--red-bg:#fef2f2;--red-br:#fca5a5;
+  --amber:#f59e0b;--amber-bg:#fffbeb;--amber-br:#fde68a;
   --tx:#0f172a;--tx2:#475569;--tx3:#94a3b8;
-  --bd:#e2e8f0;--bg:#f8fafc;--wh:#fff;
-  --sh:0 1px 3px rgba(0,0,0,.08);--sh2:0 4px 20px rgba(0,0,0,.12);
-  --r:14px;--rs:10px;
+  --bd:#e2e8f0;--bg:#f1f5f9;--wh:#fff;
+  --sh:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+  --sh2:0 4px 20px rgba(0,0,0,.11);
+  --r:16px;--rs:10px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
-body{font-family:'Inter','Noto Sans Thai',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px;line-height:1.5;padding-bottom:90px}
+body{font-family:'Inter','Noto Sans Thai',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px;line-height:1.5;padding-bottom:96px}
 
-/* HEADER */
-.hdr{background:var(--wh);border-bottom:1px solid var(--bd);padding:0 16px;height:54px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:200;box-shadow:var(--sh)}
-.hdr-logo{width:34px;height:34px;background:linear-gradient(135deg,var(--green),var(--green-l));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.hdr h1{font-size:15px;font-weight:700}
-.hdr p{font-size:10px;color:var(--tx3)}
+/* ── HEADER ── */
+.hdr{background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);padding:0 18px;height:58px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+.hdr-logo{width:36px;height:36px;background:linear-gradient(135deg,var(--green),var(--green-l));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 2px 8px rgba(34,197,94,.3)}
+.hdr-txt h1{font-size:15px;font-weight:700;color:#fff}
+.hdr-txt p{font-size:10px;color:rgba(255,255,255,.5)}
 .hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px}
-.mode-badge{font-size:10px;font-weight:700;padding:4px 9px;border-radius:20px;white-space:nowrap}
-.mode-admin{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
-.mode-view{background:var(--green-bg);color:var(--green);border:1px solid var(--green-br)}
-.mode-toggle{font-size:11px;color:var(--tx3);background:none;border:1px solid var(--bd);border-radius:8px;padding:4px 9px;cursor:pointer;font-family:inherit}
+.admin-pill{background:rgba(34,197,94,.15);color:#86efac;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;border:1px solid rgba(34,197,94,.25)}
+.view-link{font-size:11px;color:rgba(255,255,255,.6);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:5px 10px;text-decoration:none;white-space:nowrap;transition:.15s}
+.view-link:hover{background:rgba(255,255,255,.15);color:#fff}
 
-/* PAGE */
-.page{max-width:860px;margin:0 auto;padding:14px 12px}
+/* ── PAGE ── */
+.page{max-width:880px;margin:0 auto;padding:16px 14px}
 
-/* DATE BAR */
-.date-bar{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.date-bar label{font-size:12px;font-weight:600;color:var(--tx2);white-space:nowrap}
-.date-input{border:1.5px solid var(--bd);border-radius:8px;padding:7px 10px;font-size:13px;font-family:inherit;color:var(--tx);background:var(--wh);flex:1;min-width:140px;max-width:180px}
+/* ── CARD BASE ── */
+.card{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:14px}
+.card-hd{padding:13px 16px;font-size:13px;font-weight:700;color:var(--tx2);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px}
+.card-hd .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot-green{background:var(--green)}
+.dot-amber{background:var(--amber)}
+
+/* ── DATE + SEARCH ROW ── */
+.top-row{display:grid;grid-template-columns:auto 1fr;gap:10px;margin-bottom:14px;align-items:stretch}
+@media(max-width:560px){.top-row{grid-template-columns:1fr}}
+.date-card{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.date-card label{font-size:12px;font-weight:600;color:var(--tx2);white-space:nowrap}
+.date-input{border:1.5px solid var(--bd);border-radius:8px;padding:6px 10px;font-size:13px;font-family:inherit;color:var(--tx);background:var(--wh);width:148px}
 .date-input:focus{outline:none;border-color:var(--green)}
-.date-nav{display:flex;gap:6px}
-.dnav{padding:6px 12px;border-radius:8px;border:1.5px solid var(--bd);background:var(--wh);font-size:12px;cursor:pointer;font-family:inherit;color:var(--tx2);transition:.15s}
+.date-nav{display:flex;gap:5px}
+.dnav{padding:6px 10px;border-radius:8px;border:1.5px solid var(--bd);background:var(--wh);font-size:12px;cursor:pointer;font-family:inherit;color:var(--tx2);transition:.15s}
 .dnav:hover{background:#f1f5f9}
+.dnav:active{transform:scale(.95)}
 .dnav.today{background:var(--green);color:#fff;border-color:var(--green)}
+.search-card{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;display:flex;align-items:center;gap:9px}
+.search-ic{color:var(--tx3);font-size:15px;flex-shrink:0}
+.search-inp{flex:1;border:none;font-size:13px;font-family:inherit;color:var(--tx);outline:none;background:transparent}
+.search-inp::placeholder{color:var(--tx3)}
+.search-x{background:none;border:none;cursor:pointer;color:var(--tx3);font-size:15px;padding:2px;display:none}
+.search-x.show{display:block}
 
-/* SEARCH */
-.search-bar{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
-.search-icon{font-size:16px;flex-shrink:0;color:var(--tx3)}
-.search-input{flex:1;border:none;font-size:13px;font-family:inherit;color:var(--tx);outline:none;background:transparent}
-.search-input::placeholder{color:var(--tx3)}
-.search-clear{background:none;border:none;cursor:pointer;color:var(--tx3);font-size:16px;padding:2px;display:none}
-.search-clear.show{display:block}
+/* ── SUMMARY ── */
+.sumbar{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sum-item{display:flex;align-items:center;gap:9px}
+.sum-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sum-lbl{font-size:11px;color:var(--tx2)}
+.sum-val{font-size:18px;font-weight:800;color:var(--tx);line-height:1}
+.sum-sep{width:1px;height:32px;background:var(--bd)}
 
-/* SUMMARY */
-.sumbar{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.si2{display:flex;align-items:center;gap:8px}
-.sd2{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.sl2{font-size:11px;color:var(--tx2)}
-.sv{font-size:17px;font-weight:700}
-.ssep{width:1px;height:30px;background:var(--bd)}
+/* ── CARRIER GRID ── */
+.cp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+.cp{padding:13px 10px;border-radius:var(--rs);border:2.5px solid var(--bd);background:var(--bg);cursor:pointer;text-align:center;transition:.15s;font-family:inherit}
+.cp:active{transform:scale(.96)}
+.cp-ic{font-size:24px;margin-bottom:4px}
+.cp-name{font-size:14px;font-weight:700;color:var(--tx)}
+.cp-sub{font-size:10px;color:var(--tx3);margin-top:2px}
+.cp.si{border-color:var(--inter);background:var(--inter-bg)}.cp.si .cp-name{color:#0369a1}
+.cp.sd{border-color:var(--dmk);background:var(--dmk-bg)}.cp.sd .cp-name{color:#6d28d9}
 
-/* UPLOAD SECTION (admin only) */
-.upload-sec{margin-bottom:14px}
-.carrier-strip{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}
-.cs{padding:11px 10px;border-radius:var(--rs);border:2.5px solid var(--bd);background:var(--wh);cursor:pointer;text-align:center;transition:.15s;font-family:inherit}
-.cs:active{transform:scale(.97)}
-.cs-ic{font-size:20px;margin-bottom:3px}
-.cs-name{font-size:14px;font-weight:700;color:var(--tx)}
-.cs-sub{font-size:10px;color:var(--tx3)}
-.cs.si{border-color:var(--inter);background:var(--inter-bg)}.cs.si .cs-name{color:#0369a1}
-.cs.sd{border-color:var(--dmk);background:var(--dmk-bg)}.cs.sd .cs-name{color:#6d28d9}
-.action-bar{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.abtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:16px 10px;border-radius:var(--r);border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;transition:.15s}
-.abtn:active{transform:scale(.95)}
+/* ── ACTION BUTTONS ── */
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px 14px}
+.abtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px 10px;border-radius:var(--rs);border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;transition:.15s;-webkit-tap-highlight-color:transparent}
+.abtn:active{transform:scale(.94)}
 .abtn-ic{font-size:28px;line-height:1}
-.abtn-cam{background:linear-gradient(135deg,#0f172a,#1e40af);color:#fff;box-shadow:var(--sh2)}
+.abtn-cam{background:linear-gradient(135deg,#0f172a,#1e40af);color:#fff;box-shadow:0 4px 14px rgba(30,64,175,.3)}
 .abtn-gal{background:var(--wh);color:var(--tx2);border:2px solid var(--bd)}
+.abtn-gal:hover{border-color:var(--tx3)}
 #fi,#ci{display:none}
 
-/* PENDING */
-.pending-wrap{display:none;background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);padding:12px 14px;margin-top:10px;box-shadow:var(--sh)}
-.pending-wrap.show{display:block}
+/* ── IMPORT/EXPORT PANEL ── */
+.ie-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+@media(max-width:500px){.ie-grid{grid-template-columns:1fr}}
+.ie-box{border:2px dashed var(--bd);border-radius:var(--rs);padding:14px 12px;text-align:center;cursor:pointer;transition:.2s;background:var(--bg)}
+.ie-box:hover{border-color:var(--green);background:var(--green-bg)}
+.ie-box:active{transform:scale(.97)}
+.ie-ic{font-size:28px;margin-bottom:6px}
+.ie-title{font-size:13px;font-weight:700;color:var(--tx)}
+.ie-sub{font-size:11px;color:var(--tx3);margin-top:3px}
+#importFile{display:none}
+.export-btns{padding:0 14px 14px;display:flex;gap:8px;flex-wrap:wrap}
+
+/* ── PENDING THUMBS ── */
+.pending{display:none;padding:0 14px 14px}
+.pending.show{display:block}
 .pending-hd{font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:9px;display:flex;justify-content:space-between}
 .thumbs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
 .th{position:relative;width:58px;height:58px;border-radius:9px;overflow:hidden;border:2px solid var(--bd);flex-shrink:0}
 .th img{width:100%;height:100%;object-fit:cover}
-.th .tx-btn{position:absolute;top:2px;right:2px;width:15px;height:15px;background:var(--red);color:#fff;border:none;border-radius:50%;font-size:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
+.th .xbtn{position:absolute;top:2px;right:2px;width:15px;height:15px;background:var(--red);color:#fff;border:none;border-radius:50%;font-size:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
 .th-more{display:flex;align-items:center;justify-content:center;background:#f1f5f9;color:var(--tx2);font-size:11px;font-weight:700}
 .scan-row{display:flex;gap:8px}
 
-/* LOADING */
+/* ── LOADING ── */
 .load-card{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:32px 20px;text-align:center;margin-bottom:14px}
 .spin{display:inline-block;width:36px;height:36px;border:3px solid var(--bd);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:10px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -98,7 +121,7 @@ body{font-family:'Inter','Noto Sans Thai',sans-serif;background:var(--bg);color:
 .prog{margin-top:14px;height:5px;background:var(--bd);border-radius:3px;overflow:hidden}
 .prog-f{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green),var(--green-l));transition:width .35s}
 
-/* BUTTONS */
+/* ── BUTTONS ── */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:var(--rs);font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:.15s;white-space:nowrap}
 .btn:active{transform:scale(.96)}
 .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
@@ -107,35 +130,31 @@ body{font-family:'Inter','Noto Sans Thai',sans-serif;background:var(--bg);color:
 .btn-green{background:linear-gradient(135deg,var(--green),var(--green-l));color:#fff}
 .btn-inter{background:linear-gradient(135deg,#0369a1,var(--inter));color:#fff}
 .btn-dmk{background:linear-gradient(135deg,#6d28d9,var(--dmk));color:#fff}
+.btn-amber{background:linear-gradient(135deg,#d97706,var(--amber));color:#fff}
 .btn-danger{background:var(--wh);border:1.5px solid var(--red-br);color:var(--red)}
 .btn-full{width:100%;justify-content:center;padding:13px;font-size:14px}
 .btn:hover:not(:disabled){filter:brightness(1.07)}
 
-/* SECTION */
+/* ── SECTION ── */
 .sec{margin-bottom:14px}
 .sec-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .pill{padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700}
 .pill-i{background:var(--inter-bg);color:#0369a1;border:1px solid var(--inter-br)}
 .pill-d{background:var(--dmk-bg);color:#6d28d9;border:1px solid var(--dmk-br)}
 .sec-ttl{font-size:14px;font-weight:700}
-.sec-cnt{margin-left:auto;font-size:11px;color:var(--tx3);background:var(--bg);border:1px solid var(--bd);padding:3px 9px;border-radius:20px}
+.sec-cnt{margin-left:auto;font-size:11px;color:var(--tx3);background:var(--wh);border:1px solid var(--bd);padding:3px 9px;border-radius:20px}
 
-/* TABLE */
-.card{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+/* ── TABLE ── */
+.tcard{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-table{width:100%;border-collapse:collapse}
-table.admin-tbl{min-width:600px}
-table.view-tbl{min-width:400px}
-thead.thi th{background:#0369a1;color:#fff}
-thead.thd th{background:#6d28d9;color:#fff}
-th{padding:9px 9px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
-td{padding:7px 9px;border-bottom:1px solid #f8fafc;vertical-align:middle;font-size:13px}
+table{width:100%;border-collapse:collapse;min-width:580px}
+thead.thi th{background:linear-gradient(90deg,#0c4a6e,#0369a1);color:#fff}
+thead.thd th{background:linear-gradient(90deg,#4c1d95,#6d28d9);color:#fff}
+th{padding:10px 9px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.4px;white-space:nowrap}
+td{padding:7px 9px;border-bottom:1px solid #f1f5f9;vertical-align:middle;font-size:13px}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:#fafbff}
-/* view mode highlight search */
-.hl{background:#fef9c3;border-radius:3px;padding:0 1px}
-/* admin inline edit */
-.cell-view{padding:4px 7px;border-radius:6px;cursor:pointer;font-size:12px;min-height:26px;display:flex;align-items:center;transition:.1s;word-break:break-word}
+tr:hover td{background:#f8faff}
+.cell-view{padding:4px 7px;border-radius:6px;cursor:pointer;font-size:12px;min-height:26px;display:flex;align-items:center;word-break:break-word;transition:.12s}
 .cell-view:hover{background:#f1f5f9}
 .cell-view.empty{color:var(--tx3);font-style:italic}
 .cell input,.cell select{width:100%;border:1.5px solid var(--inter);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit;background:var(--wh);color:var(--tx);display:none}
@@ -143,88 +162,97 @@ tr:hover td{background:#fafbff}
 .cell.editing .cell-view{display:none}
 .cell.editing input,.cell.editing select{display:block}
 .badge-red{display:inline-block;background:var(--red-bg);color:var(--red);border:1px solid var(--red-br);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.hl{background:#fef08a;border-radius:3px;padding:0 2px}
 .td-no{width:34px;text-align:center;font-size:11px;font-weight:700;color:var(--tx3)}
 .td-qty{width:56px;text-align:center}
-.td-inv{width:115px}
-.td-red-v{width:80px}
-.td-act{width:60px;text-align:center}
+.td-inv{width:118px}
+.td-redv{width:82px}
+.td-act{width:62px;text-align:center}
 .act-btns{display:flex;gap:3px;justify-content:center}
 .edit-btn{background:none;border:1.5px solid var(--bd);border-radius:6px;cursor:pointer;color:var(--tx2);font-size:11px;padding:3px 7px;font-family:inherit;font-weight:600;transition:.15s}
-.edit-btn.save{border-color:var(--green);color:var(--green)}
-.del-btn2{background:none;border:none;cursor:pointer;color:#fca5a5;font-size:16px;padding:3px;border-radius:6px;line-height:1}
-.del-btn2:active{color:var(--red)}
-.add-row-btn{width:100%;padding:8px;background:none;border:none;border-top:1px dashed var(--bd);cursor:pointer;font-size:12px;font-family:inherit}
-.add-row-btn.ai{color:var(--inter)}.add-row-btn.ai:active{background:var(--inter-bg)}
-.add-row-btn.ad{color:var(--dmk)}.add-row-btn.ad:active{background:var(--dmk-bg)}
+.edit-btn.save{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+.del-btn{background:none;border:none;cursor:pointer;color:#fca5a5;font-size:16px;padding:3px;border-radius:6px;line-height:1}
+.del-btn:active{color:var(--red)}
+.add-row-btn{width:100%;padding:8px;background:none;border:none;border-top:1.5px dashed var(--bd);cursor:pointer;font-size:12px;font-family:inherit;transition:.15s}
+.add-row-btn.ai{color:var(--inter)}.add-row-btn.ai:hover{background:var(--inter-bg)}
+.add-row-btn.ad{color:var(--dmk)}.add-row-btn.ad:hover{background:var(--dmk-bg)}
 .tbl-ft{padding:10px 12px;background:var(--bg);border-top:1px solid var(--bd);display:flex;gap:8px;flex-wrap:wrap}
+.no-data{text-align:center;padding:32px 20px;color:var(--tx3);font-size:13px}
 
-/* VIEW mode table — clean */
-.view-row-no{color:var(--tx3);font-size:11px;font-weight:700;text-align:center}
-.view-shop{font-weight:500}
-.view-province{color:var(--tx2)}
-.view-qty{font-weight:700;color:var(--tx);text-align:center}
-.view-inv{font-family:monospace;font-size:12px;color:#0369a1}
-.no-data{text-align:center;padding:40px 20px;color:var(--tx3);font-size:13px}
-
-/* DOCK */
-.dock{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--bd);padding:10px 14px;display:flex;gap:8px;flex-wrap:wrap;z-index:100;box-shadow:0 -2px 14px rgba(0,0,0,.08)}
+/* ── DOCK ── */
+.dock{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.97);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--bd);padding:10px 16px;display:flex;gap:8px;flex-wrap:wrap;z-index:100;box-shadow:0 -3px 16px rgba(0,0,0,.09)}
 .dock.hide{display:none}
 
-/* EMPTY */
+/* ── EMPTY ── */
 .empty{text-align:center;padding:52px 20px;color:var(--tx3)}
-.empty .ei{font-size:48px;margin-bottom:10px}
+.empty .ei{font-size:50px;margin-bottom:10px}
 .empty h2{font-size:15px;font-weight:600;color:var(--tx2);margin-bottom:5px}
-.empty p{font-size:12px;line-height:1.7}
+.empty p{font-size:12px;line-height:1.8}
 
-/* TOAST */
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:9px 18px;border-radius:100px;font-size:13px;font-weight:500;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s;z-index:999;box-shadow:var(--sh2)}
+/* ── TOAST ── */
+.toast{position:fixed;bottom:82px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:9px 20px;border-radius:100px;font-size:13px;font-weight:500;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s;z-index:999;box-shadow:var(--sh2)}
 .toast.show{opacity:1}
 
-@media(min-width:601px){.action-bar{max-width:400px}.abtn{padding:18px 14px}.abtn-ic{font-size:32px}}
+@media(min-width:600px){.action-grid{max-width:420px}.abtn{padding:18px 14px}.abtn-ic{font-size:32px}}
 </style>
 </head>
 <body>
 
 <header class="hdr">
   <div class="hdr-logo">📦</div>
-  <div><h1>NewLife Delivery</h1><p>นิวไลฟ์ ฟาร์มา</p></div>
+  <div class="hdr-txt">
+    <h1>NewLife Delivery</h1>
+    <p>นิวไลฟ์ ฟาร์มา</p>
+  </div>
   <div class="hdr-right">
-    <span class="mode-badge mode-admin">✏️ Admin</span>
-    <a href="/view" style="font-size:11px;color:var(--tx3);background:none;border:1px solid var(--bd);border-radius:8px;padding:4px 9px;text-decoration:none;white-space:nowrap">👁️ หน้าดู →</a>
+    <span class="admin-pill">✏️ Admin</span>
+    <a href="/view" class="view-link">👁️ หน้าดู</a>
   </div>
 </header>
 
 <div class="page">
 
-  <!-- DATE BAR -->
-  <div class="date-bar">
-    <label>📅 วันที่:</label>
-    <input type="date" class="date-input" id="dateInput" onchange="loadDate(this.value)">
-    <div class="date-nav">
-      <button class="dnav" onclick="changeDate(-1)">◀ เมื่อวาน</button>
-      <button class="dnav today" onclick="goToday()">วันนี้</button>
-      <button class="dnav" onclick="changeDate(1)">พรุ่งนี้ ▶</button>
+  <!-- DATE + SEARCH -->
+  <div class="top-row">
+    <div class="date-card">
+      <label>📅</label>
+      <input type="date" class="date-input" id="dateInput" onchange="loadDate(this.value)">
+      <div class="date-nav">
+        <button class="dnav" onclick="changeDate(-1)">◀</button>
+        <button class="dnav today" onclick="goToday()">วันนี้</button>
+        <button class="dnav" onclick="changeDate(1)">▶</button>
+      </div>
+    </div>
+    <div class="search-card">
+      <span class="search-ic">🔍</span>
+      <input type="text" class="search-inp" id="searchInput" placeholder="ค้นหาชื่อร้าน, จังหวัด, Invoice..." oninput="onSearch(this.value)">
+      <button class="search-x" id="searchX" onclick="clearSearch()">✕</button>
     </div>
   </div>
 
-  <!-- SEARCH -->
-  <div class="search-bar">
-    <span class="search-icon">🔍</span>
-    <input type="text" class="search-input" id="searchInput" placeholder="ค้นหาชื่อร้าน, จังหวัด, Invoice..." oninput="onSearch(this.value)">
-    <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+  <!-- SUMMARY -->
+  <div class="sumbar" id="sumbar" style="display:none">
+    <div class="sum-item"><div class="sum-dot" style="background:var(--inter)"></div><div><div class="sum-lbl">Inter</div><div class="sum-val" id="sv-i">0</div></div></div>
+    <div class="sum-sep"></div>
+    <div class="sum-item"><div class="sum-dot" style="background:var(--dmk)"></div><div><div class="sum-lbl">DMK</div><div class="sum-val" id="sv-d">0</div></div></div>
+    <div class="sum-sep"></div>
+    <div class="sum-item"><div class="sum-dot" style="background:var(--green)"></div><div><div class="sum-lbl">รวมกล่อง</div><div class="sum-val" id="sv-box">0</div></div></div>
+    <div class="sum-sep"></div>
+    <div class="sum-item"><div class="sum-dot" style="background:var(--tx)"></div><div><div class="sum-lbl">รายการ</div><div class="sum-val" id="sv-all">0</div></div></div>
   </div>
 
-  <!-- UPLOAD (admin only) -->
-  <div class="upload-sec" id="uploadSec">
-    <div class="carrier-strip">
-      <button class="cs si" id="csI" onclick="setCarrier('inter')">
-        <div class="cs-ic">🚛</div><div class="cs-name">Inter</div><div class="cs-sub">ขนส่ง Inter</div>
+  <!-- UPLOAD CARD -->
+  <div class="card">
+    <div class="card-hd"><span class="dot dot-green"></span>อัปโหลดใบนำส่งสินค้า</div>
+    <div class="cp-grid">
+      <button class="cp si" id="cpI" onclick="setCarrier('inter')">
+        <div class="cp-ic">🚛</div><div class="cp-name">Inter</div><div class="cp-sub">ขนส่ง Inter</div>
       </button>
-      <button class="cs" id="csD" onclick="setCarrier('dmk')">
-        <div class="cs-ic">🚚</div><div class="cs-name">DMK</div><div class="cs-sub">ขนส่ง DMK</div>
+      <button class="cp" id="cpD" onclick="setCarrier('dmk')">
+        <div class="cp-ic">🚚</div><div class="cp-name">DMK</div><div class="cp-sub">ขนส่ง DMK</div>
       </button>
     </div>
-    <div class="action-bar">
+    <div class="action-grid">
       <button class="abtn abtn-cam" onclick="document.getElementById('ci').click()">
         <div class="abtn-ic">📷</div><span>ถ่ายรูป</span>
       </button>
@@ -234,12 +262,42 @@ tr:hover td{background:#fafbff}
     </div>
     <input type="file" id="ci" accept="image/*" capture="environment">
     <input type="file" id="fi" multiple accept="image/*">
-    <div class="pending-wrap" id="pendingWrap">
-      <div class="pending-hd"><span id="pendingLabel">📎 รูปที่รอสแกน</span><span id="pendingCount" style="font-size:11px;color:var(--tx3)"></span></div>
+    <div class="pending" id="pending">
+      <div class="pending-hd"><span>📎 รูปที่รอสแกน</span><span id="pendingCnt" style="color:var(--tx3);font-size:11px"></span></div>
       <div class="thumbs" id="thumbs"></div>
       <div class="scan-row">
         <button class="btn btn-dark" id="btnScan" onclick="scan()">🔍 สแกนด้วย AI</button>
         <button class="btn btn-ghost" onclick="clearFiles()">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMPORT / EXPORT CARD -->
+  <div class="card">
+    <div class="card-hd"><span class="dot dot-amber"></span>Import / Export Excel</div>
+    <div class="ie-grid">
+      <!-- Import -->
+      <div>
+        <div class="ie-box" onclick="triggerImport()">
+          <div class="ie-ic">📤</div>
+          <div class="ie-title">Import Excel</div>
+          <div class="ie-sub">นำเข้าข้อมูลจากไฟล์ .xlsx</div>
+        </div>
+        <input type="file" id="importFile" accept=".xlsx,.xls" onchange="importExcel(this)">
+        <div id="importStatus" style="margin-top:8px;font-size:11px;color:var(--tx3);text-align:center"></div>
+      </div>
+      <!-- Export -->
+      <div>
+        <div class="ie-box" style="cursor:default;pointer-events:none">
+          <div class="ie-ic">📥</div>
+          <div class="ie-title">Export Excel</div>
+          <div class="ie-sub">ดาวน์โหลดข้อมูลเป็น .xlsx</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
+          <button class="btn btn-inter" style="justify-content:center;width:100%" onclick="exportExcel('inter')">📥 Export Inter</button>
+          <button class="btn btn-dmk" style="justify-content:center;width:100%" onclick="exportExcel('dmk')">📥 Export DMK</button>
+          <button class="btn btn-green" style="justify-content:center;width:100%" onclick="exportBoth()">📥 Export ทั้งหมด</button>
+        </div>
       </div>
     </div>
   </div>
@@ -252,408 +310,294 @@ tr:hover td{background:#fafbff}
     <div class="prog"><div class="prog-f" id="pf" style="width:5%"></div></div>
   </div>
 
-  <!-- Summary -->
-  <div class="sumbar" id="sumbar" style="display:none">
-    <div class="si2"><div class="sd2" style="background:var(--inter)"></div><div><div class="sl2">Inter</div><div class="sv" id="sv-i">0</div></div></div>
-    <div class="ssep"></div>
-    <div class="si2"><div class="sd2" style="background:var(--dmk)"></div><div><div class="sl2">DMK</div><div class="sv" id="sv-d">0</div></div></div>
-    <div class="ssep"></div>
-    <div class="si2"><div class="sd2" style="background:var(--green)"></div><div><div class="sl2">รวมกล่อง</div><div class="sv" id="sv-boxes">0</div></div></div>
-    <div class="ssep"></div>
-    <div class="si2"><div class="sd2" style="background:var(--tx)"></div><div><div class="sl2">รายการ</div><div class="sv" id="sv-a">0</div></div></div>
-  </div>
-
-  <!-- Inter section -->
+  <!-- Inter -->
   <div class="sec" id="secI" style="display:none">
     <div class="sec-hdr">
       <span class="pill pill-i">🚛 Inter</span>
       <span class="sec-ttl">ใบนำส่ง Inter</span>
       <span class="sec-cnt" id="cntI">0</span>
     </div>
-    <div class="card" id="cardI"></div>
+    <div class="tcard" id="cardI"></div>
   </div>
 
-  <!-- DMK section -->
+  <!-- DMK -->
   <div class="sec" id="secD" style="display:none">
     <div class="sec-hdr">
       <span class="pill pill-d">🚚 DMK</span>
       <span class="sec-ttl">ใบนำส่ง DMK</span>
       <span class="sec-cnt" id="cntD">0</span>
     </div>
-    <div class="card" id="cardD"></div>
+    <div class="tcard" id="cardD"></div>
   </div>
 
   <!-- Empty -->
   <div class="empty" id="emp" style="display:none">
-    <div class="ei">📋</div>
-    <h2>ไม่มีข้อมูลวันนี้</h2>
-    <p id="empDesc">เลือกขนส่ง → กด 📷 ถ่ายรูป → AI อ่านให้อัตโนมัติ</p>
+    <div class="ei">📦</div>
+    <h2>ยังไม่มีข้อมูลวันนี้</h2>
+    <p>กด 📷 ถ่ายรูปใบนำส่ง → AI อ่านให้อัตโนมัติ<br>หรือ Import จาก Excel ก็ได้</p>
   </div>
 
 </div>
 
-<!-- Export dock (admin) -->
+<!-- Dock (shortcut export) -->
 <div class="dock hide" id="dock">
-  <button class="btn btn-inter" id="dI" onclick="exportExcel('inter')" style="display:none">📥 Export Inter</button>
-  <button class="btn btn-dmk" id="dD" onclick="exportExcel('dmk')" style="display:none">📥 Export DMK</button>
+  <button class="btn btn-inter" id="dI" onclick="exportExcel('inter')" style="display:none">📥 Inter</button>
+  <button class="btn btn-dmk" id="dD" onclick="exportExcel('dmk')" style="display:none">📥 DMK</button>
   <button class="btn btn-green btn-full" id="dA" onclick="exportBoth()" style="display:none">📥 Export ทั้งหมด</button>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ── STATE ──
 let files = []
 let carrier = 'inter'
 let rows = { inter: [], dmk: [] }
 let editingRow = { inter: -1, dmk: -1 }
-let sessionDate = new Date().toISOString().slice(0, 10)
+let sessionDate = new Date().toISOString().slice(0,10)
 let searchQ = ''
-let isAdmin = true  // เริ่มต้นเป็น admin mode
 
-// ── INIT ──
 document.getElementById('dateInput').value = sessionDate
 loadDate(sessionDate)
-
-// ── MODE TOGGLE ──
-function toggleMode() {
-  isAdmin = !isAdmin
-  document.getElementById('modeBadge').className = 'mode-badge ' + (isAdmin ? 'mode-admin' : 'mode-view')
-  document.getElementById('modeBadge').textContent = isAdmin ? '✏️ Admin' : '👁️ ดู'
-  document.getElementById('modeToggleBtn').textContent = isAdmin ? 'เปลี่ยนเป็น 👁️ ดู' : 'เปลี่ยนเป็น ✏️ Admin'
-  document.getElementById('uploadSec').style.display = isAdmin ? 'block' : 'none'
-  document.getElementById('dock').className = isAdmin && hasData() ? 'dock' : 'dock hide'
-  document.getElementById('empDesc').textContent = isAdmin
-    ? 'เลือกขนส่ง → กด 📷 ถ่ายรูป → AI อ่านให้อัตโนมัติ'
-    : 'ยังไม่มีข้อมูลในวันที่นี้'
-  renderAll()
-}
-
-function hasData() {
-  return rows.inter.length > 0 || rows.dmk.length > 0
-}
 
 // ── DATE ──
 async function loadDate(date) {
   sessionDate = date
   document.getElementById('dateInput').value = date
-  editingRow = { inter: -1, dmk: -1 }
+  editingRow = { inter:-1, dmk:-1 }
   try {
     const res = await fetch(`/api/rows?date=${date}`)
     const data = await res.json()
     if (data.ok) {
-      rows.inter = data.rows.filter(r => r.carrier === 'inter')
-      rows.dmk   = data.rows.filter(r => r.carrier === 'dmk')
+      rows.inter = data.rows.filter(r => r.carrier==='inter')
+      rows.dmk   = data.rows.filter(r => r.carrier==='dmk')
       renderAll()
     }
-  } catch(e) {
-    showToast('❌ โหลดข้อมูลไม่ได้')
-  }
+  } catch(e) { showToast('❌ โหลดไม่ได้') }
 }
-
-function changeDate(delta) {
-  const d = new Date(sessionDate)
-  d.setDate(d.getDate() + delta)
-  loadDate(d.toISOString().slice(0, 10))
+function changeDate(d) {
+  const dt = new Date(sessionDate); dt.setDate(dt.getDate()+d)
+  loadDate(dt.toISOString().slice(0,10))
 }
-
-function goToday() {
-  loadDate(new Date().toISOString().slice(0, 10))
-}
+function goToday() { loadDate(new Date().toISOString().slice(0,10)) }
 
 // ── SEARCH ──
 function onSearch(q) {
   searchQ = q.toLowerCase().trim()
-  document.getElementById('searchClear').className = q ? 'search-clear show' : 'search-clear'
+  document.getElementById('searchX').className = q ? 'search-x show' : 'search-x'
   renderAll()
 }
-
 function clearSearch() {
-  searchQ = ''
-  document.getElementById('searchInput').value = ''
-  document.getElementById('searchClear').className = 'search-clear'
-  renderAll()
+  searchQ = ''; document.getElementById('searchInput').value = ''
+  document.getElementById('searchX').className = 'search-x'; renderAll()
 }
-
 function filterRows(r) {
   if (!searchQ) return r
-  return r.filter(row =>
-    (row.shop_name||'').toLowerCase().includes(searchQ) ||
-    (row.province||'').toLowerCase().includes(searchQ) ||
-    (row.invoice_no||'').toLowerCase().includes(searchQ)
-  )
+  return r.filter(x =>
+    (x.shop_name||'').toLowerCase().includes(searchQ)||
+    (x.province||'').toLowerCase().includes(searchQ)||
+    (x.invoice_no||'').toLowerCase().includes(searchQ))
 }
-
-function highlight(text) {
-  if (!searchQ || !text) return text || '-'
-  const escaped = searchQ.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  return String(text).replace(new RegExp(`(${escaped})`, 'gi'), '<span class="hl">$1</span>')
+function hl(t) {
+  if (!searchQ||!t) return t||'-'
+  return String(t).replace(new RegExp(`(${searchQ.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<span class="hl">$1</span>')
 }
 
 // ── CARRIER ──
 function setCarrier(c) {
   carrier = c
-  document.getElementById('csI').className = 'cs' + (c==='inter' ? ' si' : '')
-  document.getElementById('csD').className = 'cs' + (c==='dmk' ? ' sd' : '')
+  document.getElementById('cpI').className = 'cp'+(c==='inter'?' si':'')
+  document.getElementById('cpD').className = 'cp'+(c==='dmk'?' sd':'')
 }
 
 // ── FILES ──
 document.getElementById('ci').addEventListener('change', e => {
-  const f = [...e.target.files]; e.target.value = ''
-  if (!f.length) return
-  addFiles(f); scanFiles(f)
+  const f=[...e.target.files]; e.target.value=''
+  if(!f.length) return; addFiles(f); scanFiles(f)
 })
 document.getElementById('fi').addEventListener('change', e => {
-  const f = [...e.target.files]; e.target.value = ''
-  if (!f.length) return
-  addFiles(f)
-  if (f.length === 1) scanFiles(f); else showPending()
+  const f=[...e.target.files]; e.target.value=''
+  if(!f.length) return; addFiles(f); f.length===1?scanFiles(f):showPending()
 })
-document.addEventListener('dragover', e => e.preventDefault())
+document.addEventListener('dragover', e=>e.preventDefault())
 document.addEventListener('drop', e => {
   e.preventDefault()
-  const imgs = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'))
-  if (imgs.length) { addFiles(imgs); showPending() }
+  const imgs=[...e.dataTransfer.files].filter(f=>f.type.startsWith('image/'))
+  if(imgs.length){addFiles(imgs);showPending()}
 })
-
-function addFiles(f) { files = [...files, ...f]; renderThumbs() }
-function renderThumbs() {
-  const c = document.getElementById('thumbs')
-  c.innerHTML = ''
-  files.slice(0,8).forEach((f,i) => {
-    const url = URL.createObjectURL(f)
-    const d = document.createElement('div'); d.className = 'th'
-    d.innerHTML = `<img src="${url}" loading="lazy"><button class="tx-btn" onclick="rmF(${i})">×</button>`
+function addFiles(f){files=[...files,...f];renderThumbs()}
+function renderThumbs(){
+  const c=document.getElementById('thumbs'); c.innerHTML=''
+  files.slice(0,8).forEach((f,i)=>{
+    const url=URL.createObjectURL(f), d=document.createElement('div'); d.className='th'
+    d.innerHTML=`<img src="${url}" loading="lazy"><button class="xbtn" onclick="rmF(${i})">×</button>`
     c.appendChild(d)
   })
-  if (files.length > 8) {
-    const m = document.createElement('div'); m.className = 'th th-more'
-    m.textContent = `+${files.length-8}`; c.appendChild(m)
-  }
-  document.getElementById('pendingCount').textContent = `${files.length} รูป`
+  if(files.length>8){const m=document.createElement('div');m.className='th th-more';m.textContent=`+${files.length-8}`;c.appendChild(m)}
+  document.getElementById('pendingCnt').textContent=`${files.length} รูป`
 }
-function showPending() {
-  document.getElementById('pendingWrap').className = files.length ? 'pending-wrap show' : 'pending-wrap'
-}
-function rmF(i) { files.splice(i,1); renderThumbs(); showPending() }
-function clearFiles() { files=[]; renderThumbs(); showPending() }
+function showPending(){document.getElementById('pending').className=files.length?'pending show':'pending'}
+function rmF(i){files.splice(i,1);renderThumbs();showPending()}
+function clearFiles(){files=[];renderThumbs();showPending()}
 
 // ── SCAN ──
-async function scan() { if (files.length) await scanFiles([...files]) }
-
-async function scanFiles(fileList) {
-  if (!fileList.length) return
-  document.getElementById('btnScan').disabled = true
-  document.getElementById('loadCard').style.display = 'block'
-  document.getElementById('pendingWrap').className = 'pending-wrap'
-  document.getElementById('loadT').textContent = `กำลังอ่าน ${fileList.length} ใบ (${carrier==='inter'?'Inter':'DMK'})...`
-  document.getElementById('pf').style.width = '10%'
-
-  const fd = new FormData()
-  fileList.forEach(f => fd.append('images', f))
-  fd.append('carrier', carrier)
-  fd.append('session_date', sessionDate)
-
-  try {
-    document.getElementById('pf').style.width = '40%'
-    const res = await fetch('/api/ocr', { method:'POST', body:fd })
-    document.getElementById('pf').style.width = '88%'
-    if (!res.ok) throw new Error(`Server ${res.status}`)
-    const data = await res.json()
-    document.getElementById('pf').style.width = '100%'
-    if (!data.ok) throw new Error(data.error||'AI อ่านไม่สำเร็จ')
-
-    rows[carrier] = [...rows[carrier], ...data.results]
-    files = files.filter(f => !fileList.includes(f))
-    renderThumbs()
-    renderAll()
+async function scan(){if(files.length)await scanFiles([...files])}
+async function scanFiles(fl){
+  if(!fl.length)return
+  document.getElementById('btnScan').disabled=true
+  document.getElementById('loadCard').style.display='block'
+  document.getElementById('pending').className='pending'
+  document.getElementById('loadT').textContent=`กำลังอ่าน ${fl.length} ใบ (${carrier==='inter'?'Inter':'DMK'})...`
+  document.getElementById('pf').style.width='10%'
+  const fd=new FormData(); fl.forEach(f=>fd.append('images',f))
+  fd.append('carrier',carrier); fd.append('session_date',sessionDate)
+  try{
+    document.getElementById('pf').style.width='40%'
+    const res=await fetch('/api/ocr',{method:'POST',body:fd})
+    document.getElementById('pf').style.width='88%'
+    if(!res.ok)throw new Error(`Server ${res.status}`)
+    const data=await res.json()
+    document.getElementById('pf').style.width='100%'
+    if(!data.ok)throw new Error(data.error||'AI อ่านไม่สำเร็จ')
+    rows[carrier]=[...rows[carrier],...data.results]
+    files=files.filter(f=>!fl.includes(f)); renderThumbs(); renderAll()
     showToast(`✅ บันทึก ${data.results.length} ใบ → ${carrier==='inter'?'Inter':'DMK'}`)
-  } catch(e) {
-    showToast('❌ ' + e.message)
-    showPending()
-  }
-  document.getElementById('loadCard').style.display = 'none'
-  document.getElementById('btnScan').disabled = false
+  }catch(e){showToast('❌ '+e.message);showPending()}
+  document.getElementById('loadCard').style.display='none'
+  document.getElementById('btnScan').disabled=false
 }
 
-// ── RENDER ALL ──
-function renderAll() {
-  const fi = filterRows(rows.inter)
-  const fd = filterRows(rows.dmk)
-  const hi = rows.inter.length > 0, hd = rows.dmk.length > 0
-  const fhi = fi.length > 0, fhd = fd.length > 0
-
-  document.getElementById('secI').style.display = hi ? 'block' : 'none'
-  document.getElementById('secD').style.display = hd ? 'block' : 'none'
-  document.getElementById('emp').style.display = (!hi && !hd) ? 'block' : 'none'
-  document.getElementById('sumbar').style.display = (hi||hd) ? 'flex' : 'none'
-
-  document.getElementById('sv-i').textContent = rows.inter.length
-  document.getElementById('sv-d').textContent = rows.dmk.length
-  document.getElementById('sv-a').textContent = rows.inter.length + rows.dmk.length
-  const totalBoxes = [...rows.inter,...rows.dmk].reduce((s,r)=>s+(+r.quantity||0),0)
-  document.getElementById('sv-boxes').textContent = totalBoxes
-
-  document.getElementById('cntI').textContent = fi.length !== rows.inter.length ? `${fi.length}/${rows.inter.length} รายการ` : `${rows.inter.length} รายการ`
-  document.getElementById('cntD').textContent = fd.length !== rows.dmk.length ? `${fd.length}/${rows.dmk.length} รายการ` : `${rows.dmk.length} รายการ`
-
-  renderCard('inter', fi)
-  renderCard('dmk', fd)
-
-  // dock (admin only)
-  if (isAdmin) {
-    document.getElementById('dock').className = (hi||hd) ? 'dock' : 'dock hide'
-    document.getElementById('dI').style.display = hi ? 'inline-flex' : 'none'
-    document.getElementById('dD').style.display = hd ? 'inline-flex' : 'none'
-    document.getElementById('dA').style.display = (hi&&hd) ? 'flex' : 'none'
-  } else {
-    document.getElementById('dock').className = 'dock hide'
-  }
+// ── RENDER ──
+function renderAll(){
+  const fi=filterRows(rows.inter), fd=filterRows(rows.dmk)
+  const hi=rows.inter.length>0, hd=rows.dmk.length>0
+  document.getElementById('secI').style.display=hi?'block':'none'
+  document.getElementById('secD').style.display=hd?'block':'none'
+  document.getElementById('emp').style.display=(!hi&&!hd)?'block':'none'
+  document.getElementById('sumbar').style.display=(hi||hd)?'flex':'none'
+  document.getElementById('sv-i').textContent=rows.inter.length
+  document.getElementById('sv-d').textContent=rows.dmk.length
+  document.getElementById('sv-all').textContent=rows.inter.length+rows.dmk.length
+  document.getElementById('sv-box').textContent=[...rows.inter,...rows.dmk].reduce((s,r)=>s+(+r.quantity||0),0)
+  const sc=(f,a)=>f.length!==a.length?`${f.length}/${a.length} รายการ`:`${a.length} รายการ`
+  document.getElementById('cntI').textContent=sc(fi,rows.inter)
+  document.getElementById('cntD').textContent=sc(fd,rows.dmk)
+  renderCard('inter',fi); renderCard('dmk',fd)
+  const dock=document.getElementById('dock')
+  dock.className=(hi||hd)?'dock':'dock hide'
+  document.getElementById('dI').style.display=hi?'inline-flex':'none'
+  document.getElementById('dD').style.display=hd?'inline-flex':'none'
+  document.getElementById('dA').style.display=(hi&&hd)?'flex':'none'
 }
 
-// ── RENDER CARD ──
-function renderCard(c, filteredRows) {
-  const card = document.getElementById(c==='inter'?'cardI':'cardD')
-  const eRow = editingRow[c]
-
-  if (!filteredRows.length) {
-    card.innerHTML = `<div class="no-data">${searchQ ? '🔍 ไม่พบผลการค้นหา' : 'ไม่มีข้อมูล'}</div>`
-    return
-  }
-
-  if (isAdmin) {
-    // ADMIN TABLE
-    card.innerHTML = ''
-    const wrap = document.createElement('div'); wrap.className = 'tbl-wrap'
-    const table = document.createElement('table'); table.className = 'admin-tbl'
-    const thead = document.createElement('thead')
-    thead.className = c==='inter'?'thi':'thd'
-    thead.innerHTML = `<tr><th class="td-no">#</th><th>ชื่อ</th><th style="width:95px">จังหวัด</th><th class="td-qty">กล่อง</th><th class="td-inv">Invoice</th><th class="td-red-v">คาดแดง</th><th class="td-act"></th></tr>`
-    const tbody = document.createElement('tbody')
-
-    // หา index จริงใน rows[c] จาก filteredRows
-    filteredRows.forEach((r) => {
-      const realIdx = rows[c].indexOf(r)
-      const ed = (realIdx === eRow)
-      const tr = document.createElement('tr')
-      const shopV = ed ? `<div class="cell editing"><input id="inp-shop-${c}-${realIdx}" value="${esc(r.shop_name)}" placeholder="ชื่อร้าน" oninput="rows['${c}'][${realIdx}].shop_name=this.value"></div>` : `<div class="cell"><div class="cell-view ${r.shop_name?'':'empty'}" onclick="startEdit('${c}',${realIdx})">${highlight(r.shop_name)||'<span style="color:var(--tx3)">-</span>'}</div></div>`
-      const provV = ed ? `<div class="cell editing"><input value="${esc(r.province)}" placeholder="จังหวัด" oninput="rows['${c}'][${realIdx}].province=this.value"></div>` : `<div class="cell"><div class="cell-view ${r.province?'':'empty'}" onclick="startEdit('${c}',${realIdx})">${highlight(r.province)||'<span style="color:var(--tx3)">-</span>'}</div></div>`
-      const qtyV = ed ? `<div class="cell editing"><input type="number" value="${r.quantity||0}" style="text-align:center" oninput="rows['${c}'][${realIdx}].quantity=+this.value"></div>` : `<div class="cell"><div class="cell-view" onclick="startEdit('${c}',${realIdx})" style="justify-content:center;font-weight:700">${r.quantity||0}</div></div>`
-      const invV = ed ? `<div class="cell editing"><input value="${esc(r.invoice_no)}" placeholder="IV..." oninput="rows['${c}'][${realIdx}].invoice_no=this.value"></div>` : `<div class="cell"><div class="cell-view ${r.invoice_no?'':'empty'}" onclick="startEdit('${c}',${realIdx})">${highlight(r.invoice_no)||'<span style="color:var(--tx3)">-</span>'}</div></div>`
-      const redV = ed ? `<div class="cell editing"><select onchange="rows['${c}'][${realIdx}].red_sticker=this.value==='red'"><option value="" ${!r.red_sticker?'selected':''}>-</option><option value="red" ${r.red_sticker?'selected':''}>🔴 คาดแดง</option></select></div>` : `<div class="cell"><div class="cell-view" onclick="startEdit('${c}',${realIdx})">${r.red_sticker?'<span class="badge-red">🔴 คาดแดง</span>':'<span style="color:var(--tx3)">-</span>'}</div></div>`
-      const actV = ed ? `<div class="act-btns"><button class="edit-btn save" onclick="saveEdit('${c}',${realIdx})">✓</button></div>` : `<div class="act-btns"><button class="edit-btn" onclick="startEdit('${c}',${realIdx})">✏️</button><button class="del-btn2" onclick="delRow('${c}',${realIdx})">×</button></div>`
-      tr.innerHTML = `<td class="td-no">${realIdx+1}</td><td>${shopV}</td><td>${provV}</td><td class="td-qty">${qtyV}</td><td class="td-inv">${invV}</td><td class="td-red-v">${redV}</td><td class="td-act">${actV}</td>`
-      tbody.appendChild(tr)
-    })
-
-    table.appendChild(thead); table.appendChild(tbody); wrap.appendChild(table)
-    const addBtn = document.createElement('button')
-    addBtn.className = 'add-row-btn ' + (c==='inter'?'ai':'ad')
-    addBtn.textContent = '＋ เพิ่มแถว'
-    addBtn.onclick = () => addRow(c)
-    wrap.appendChild(addBtn)
-    card.appendChild(wrap)
-
-    const ft = document.createElement('div'); ft.className = 'tbl-ft'
-    ft.innerHTML = `<button class="btn btn-danger" onclick="clearRows('${c}')">🗑️ เคลียร์ ${c==='inter'?'Inter':'DMK'}</button>`
-    card.appendChild(ft)
-
-    if (eRow >= 0) setTimeout(() => document.getElementById(`inp-shop-${c}-${eRow}`)?.focus(), 40)
-
-  } else {
-    // VIEW TABLE — clean, no edit
-    card.innerHTML = ''
-    const wrap = document.createElement('div'); wrap.className = 'tbl-wrap'
-    const table = document.createElement('table'); table.className = 'view-tbl'
-    const thead = document.createElement('thead')
-    thead.className = c==='inter'?'thi':'thd'
-    thead.innerHTML = `<tr><th class="td-no">#</th><th>ชื่อร้านค้า / รพ. / คลินิก</th><th style="width:90px">จังหวัด</th><th style="width:55px;text-align:center">กล่อง</th><th style="width:110px">Invoice</th><th style="width:75px">คาดแดง</th></tr>`
-    const tbody = document.createElement('tbody')
-
-    filteredRows.forEach((r, i) => {
-      const tr = document.createElement('tr')
-      tr.innerHTML = `
-        <td class="view-row-no">${rows[c].indexOf(r)+1}</td>
-        <td class="view-shop">${highlight(r.shop_name)||'-'}</td>
-        <td class="view-province">${highlight(r.province)||'-'}</td>
-        <td class="view-qty">${r.quantity||0}</td>
-        <td class="view-inv">${highlight(r.invoice_no)||'-'}</td>
-        <td>${r.red_sticker?'<span class="badge-red">🔴 คาดแดง</span>':'-'}</td>
-      `
-      tbody.appendChild(tr)
-    })
-
-    table.appendChild(thead); table.appendChild(tbody); wrap.appendChild(table)
-    card.appendChild(wrap)
-  }
+function renderCard(c,fRows){
+  const card=document.getElementById(c==='inter'?'cardI':'cardD')
+  const eRow=editingRow[c]
+  if(!fRows.length){card.innerHTML=`<div class="no-data">${searchQ?'🔍 ไม่พบผลการค้นหา':'ไม่มีข้อมูล'}</div>`;return}
+  card.innerHTML=''
+  const wrap=document.createElement('div');wrap.className='tbl-wrap'
+  const tbl=document.createElement('table')
+  const thead=document.createElement('thead');thead.className=c==='inter'?'thi':'thd'
+  thead.innerHTML=`<tr><th class="td-no">#</th><th>ชื่อร้านค้า / รพ. / คลินิก</th><th style="width:90px">จังหวัด</th><th class="td-qty">กล่อง</th><th class="td-inv">Invoice</th><th class="td-redv">คาดแดง</th><th class="td-act"></th></tr>`
+  const tbody=document.createElement('tbody')
+  fRows.forEach(r=>{
+    const i=rows[c].indexOf(r), ed=i===eRow
+    const tr=document.createElement('tr')
+    const sv=(val,ph,key)=>ed?`<div class="cell editing"><input id="inp-${key}-${c}-${i}" value="${esc(val)}" placeholder="${ph}" oninput="rows['${c}'][${i}].${key}=this.value"></div>`:`<div class="cell"><div class="cell-view ${val?'':'empty'}" onclick="startEdit('${c}',${i})">${hl(val)||`<span style="color:var(--tx3)">-</span>`}</div></div>`
+    const sqty=ed?`<div class="cell editing"><input type="number" value="${r.quantity||0}" style="text-align:center" oninput="rows['${c}'][${i}].quantity=+this.value"></div>`:`<div class="cell"><div class="cell-view" onclick="startEdit('${c}',${i})" style="justify-content:center;font-weight:700">${r.quantity||0}</div></div>`
+    const sred=ed?`<div class="cell editing"><select onchange="rows['${c}'][${i}].red_sticker=this.value==='red'"><option value="" ${!r.red_sticker?'selected':''}>-</option><option value="red" ${r.red_sticker?'selected':''}>🔴 คาดแดง</option></select></div>`:`<div class="cell"><div class="cell-view" onclick="startEdit('${c}',${i})">${r.red_sticker?'<span class="badge-red">🔴 คาดแดง</span>':'<span style="color:var(--tx3)">-</span>'}</div></div>`
+    const sact=ed?`<div class="act-btns"><button class="edit-btn save" onclick="saveEdit('${c}',${i})">✓</button></div>`:`<div class="act-btns"><button class="edit-btn" onclick="startEdit('${c}',${i})">✏️</button><button class="del-btn" onclick="delRow('${c}',${i})">×</button></div>`
+    tr.innerHTML=`<td class="td-no">${i+1}</td><td>${sv(r.shop_name,'ชื่อร้าน','shop_name')}</td><td>${sv(r.province,'จังหวัด','province')}</td><td class="td-qty">${sqty}</td><td class="td-inv">${sv(r.invoice_no,'IV...','invoice_no')}</td><td class="td-redv">${sred}</td><td class="td-act">${sact}</td>`
+    tbody.appendChild(tr)
+  })
+  tbl.appendChild(thead);tbl.appendChild(tbody);wrap.appendChild(tbl)
+  const ab=document.createElement('button')
+  ab.className='add-row-btn '+(c==='inter'?'ai':'ad');ab.textContent='＋ เพิ่มแถว';ab.onclick=()=>addRow(c)
+  wrap.appendChild(ab);card.appendChild(wrap)
+  const ft=document.createElement('div');ft.className='tbl-ft'
+  ft.innerHTML=`<button class="btn btn-danger" onclick="clearRows('${c}')">🗑️ เคลียร์ ${c==='inter'?'Inter':'DMK'}</button>`
+  card.appendChild(ft)
+  if(eRow>=0)setTimeout(()=>document.getElementById(`inp-shop_name-${c}-${eRow}`)?.focus(),40)
 }
 
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;') }
-
-// ── ADMIN ACTIONS ──
-function startEdit(c, i) { editingRow[c] = i; renderCard(c, filterRows(rows[c])) }
-
-async function saveEdit(c, i) {
-  const r = rows[c][i]; editingRow[c] = -1; renderCard(c, filterRows(rows[c]))
-  if (r.id) {
-    try {
-      await fetch(`/api/rows/${r.id}`, { method:'PUT', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ shop_name:r.shop_name, province:r.province, invoice_no:r.invoice_no, quantity:r.quantity, red_sticker:r.red_sticker }) })
-    } catch(e) {}
-  }
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+function startEdit(c,i){editingRow[c]=i;renderCard(c,filterRows(rows[c]))}
+async function saveEdit(c,i){
+  const r=rows[c][i];editingRow[c]=-1;renderCard(c,filterRows(rows[c]))
+  if(r.id)try{await fetch(`/api/rows/${r.id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({shop_name:r.shop_name,province:r.province,invoice_no:r.invoice_no,quantity:r.quantity,red_sticker:r.red_sticker})})}catch(e){}
   showToast('✅ บันทึกแล้ว')
 }
-
-async function delRow(c, i) {
-  const r = rows[c][i]
-  rows[c].splice(i,1)
-  if (editingRow[c] >= rows[c].length) editingRow[c] = -1
-  renderAll()
-  if (r.id) try { await fetch(`/api/rows/${r.id}`, { method:'DELETE' }) } catch(e) {}
+async function delRow(c,i){
+  const r=rows[c][i];rows[c].splice(i,1);if(editingRow[c]>=rows[c].length)editingRow[c]=-1;renderAll()
+  if(r.id)try{await fetch(`/api/rows/${r.id}`,{method:'DELETE'})}catch(e){}
 }
-
-async function addRow(c) {
-  try {
-    const res = await fetch('/api/rows', { method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ carrier:c, session_date:sessionDate, shop_name:'', province:'', invoice_no:'', quantity:0, red_sticker:false }) })
-    const data = await res.json()
-    rows[c].push(data.ok ? data.row : { shop_name:'', province:'', invoice_no:'', quantity:0, red_sticker:false })
-  } catch(e) { rows[c].push({ shop_name:'', province:'', invoice_no:'', quantity:0, red_sticker:false }) }
-  editingRow[c] = rows[c].length - 1
-  renderAll()
+async function addRow(c){
+  try{
+    const res=await fetch('/api/rows',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({carrier:c,session_date:sessionDate,shop_name:'',province:'',invoice_no:'',quantity:0,red_sticker:false})})
+    const data=await res.json();rows[c].push(data.ok?data.row:{shop_name:'',province:'',invoice_no:'',quantity:0,red_sticker:false})
+  }catch(e){rows[c].push({shop_name:'',province:'',invoice_no:'',quantity:0,red_sticker:false})}
+  editingRow[c]=rows[c].length-1;renderAll()
 }
-
-async function clearRows(c) {
-  if (!confirm(`เคลียร์ ${c==='inter'?'Inter':'DMK'} วันที่ ${sessionDate} ทั้งหมด?`)) return
-  rows[c] = []; editingRow[c] = -1; renderAll()
-  try { await fetch(`/api/rows?carrier=${c}&date=${sessionDate}`, { method:'DELETE' }) } catch(e) {}
+async function clearRows(c){
+  if(!confirm(`เคลียร์ ${c==='inter'?'Inter':'DMK'} วันที่ ${sessionDate} ทั้งหมด?`))return
+  rows[c]=[];editingRow[c]=-1;renderAll()
+  try{await fetch(`/api/rows?carrier=${c}&date=${sessionDate}`,{method:'DELETE'})}catch(e){}
   showToast('🗑️ เคลียร์แล้ว')
 }
 
-// ── EXPORT ──
-async function exportExcel(c) { if (rows[c].length) await doExport(rows[c], c) }
-async function exportBoth() {
-  if (rows.inter.length) await doExport(rows.inter,'inter')
-  if (rows.dmk.length) await doExport(rows.dmk,'dmk')
+// ── IMPORT ──
+function triggerImport(){
+  // เลือก carrier ก่อน import
+  const c = prompt('Import เข้า carrier ไหน? พิมพ์: inter หรือ dmk', carrier)
+  if (!c || (c!=='inter'&&c!=='dmk')) return showToast('ยกเลิก หรือพิมพ์ไม่ถูก')
+  carrier = c; setCarrier(c)
+  document.getElementById('importFile').click()
 }
-async function doExport(r, c) {
-  try {
-    const res = await fetch('/api/export', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({rows:r,carrier:c}) })
-    if (!res.ok) throw new Error('export failed')
-    const blob = await res.blob()
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = `newlife_${c}_${sessionDate}.xlsx`
-    a.click()
-    showToast(`📥 Export ${c==='inter'?'Inter':'DMK'} สำเร็จ!`)
-  } catch(e) { showToast('❌ ' + e.message) }
+async function importExcel(input){
+  const file=input.files[0]; input.value=''
+  if(!file)return
+  const status=document.getElementById('importStatus')
+  status.textContent='⏳ กำลัง import...'
+  const fd=new FormData(); fd.append('file',file); fd.append('carrier',carrier); fd.append('session_date',sessionDate)
+  try{
+    const res=await fetch('/api/import',{method:'POST',body:fd})
+    const data=await res.json()
+    if(!data.ok)throw new Error(data.error)
+    rows[carrier]=[...rows[carrier],...data.inserted]
+    renderAll()
+    status.textContent=`✅ Import ${data.count} รายการสำเร็จ`
+    showToast(`✅ Import ${data.count} รายการ → ${carrier==='inter'?'Inter':'DMK'}`)
+    setTimeout(()=>{status.textContent=''},4000)
+  }catch(e){
+    status.textContent='❌ '+e.message
+    showToast('❌ Import ไม่สำเร็จ: '+e.message)
+  }
 }
 
-// ── TOAST ──
-function showToast(msg) {
-  const t = document.getElementById('toast')
-  t.textContent = msg; t.classList.add('show')
-  setTimeout(() => t.classList.remove('show'), 2800)
+// ── EXPORT ──
+async function exportExcel(c){
+  if(!rows[c].length)return showToast(`ไม่มีข้อมูล ${c==='inter'?'Inter':'DMK'}`)
+  try{
+    const res=await fetch('/api/export',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({rows:rows[c],carrier:c,date:sessionDate})})
+    if(!res.ok)throw new Error('export failed')
+    const blob=await res.blob(),a=document.createElement('a')
+    a.href=URL.createObjectURL(blob);a.download=`newlife_${c}_${sessionDate}.xlsx`;a.click()
+    showToast(`📥 Export ${c==='inter'?'Inter':'DMK'} สำเร็จ`)
+  }catch(e){showToast('❌ '+e.message)}
+}
+async function exportBoth(){
+  if(!rows.inter.length&&!rows.dmk.length)return showToast('ไม่มีข้อมูล')
+  try{
+    const res=await fetch('/api/export',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({inter:rows.inter,dmk:rows.dmk,date:sessionDate})})
+    if(!res.ok)throw new Error('export failed')
+    const blob=await res.blob(),a=document.createElement('a')
+    a.href=URL.createObjectURL(blob);a.download=`newlife_all_${sessionDate}.xlsx`;a.click()
+    showToast('📥 Export ทั้งหมดสำเร็จ')
+  }catch(e){showToast('❌ '+e.message)}
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show')
+  setTimeout(()=>t.classList.remove('show'),2800)
 }
 </script>
 </body>
