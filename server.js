@@ -348,14 +348,32 @@ app.post('/api/import-file', async (req, res) => {
     if (!fs.existsSync(filePath)) return res.json({ ok: false, error: 'file not found: ' + filename })
 
     function parseSheet(name) {
-      // ดึงวันที่ + slot (เช้า/บ่าย/null)
-      const dayM = name.match(/(\d+)\s*มี\.ค\./)
-      if (!dayM) return null
-      const date = '2026-03-' + String(dayM[1]).padStart(2, '0')
+      // ดึง slot ก่อน
       let slot = null
       if (name.includes('เช้า')) slot = 'เช้า'
       else if (name.includes('บ่าย')) slot = 'บ่าย'
-      return { date, slot }
+
+      // รองรับหลาย pattern ของชื่อ sheet
+      const thaiMonths = {
+        'ม.ค.':  '01', 'ก.พ.': '02', 'มี.ค.': '03', 'เม.ย.': '04',
+        'พ.ค.':  '05', 'มิ.ย.': '06', 'ก.ค.':  '07', 'ส.ค.':  '08',
+        'ก.ย.':  '09', 'ต.ค.':  '10', 'พ.ย.':  '11', 'ธ.ค.':  '12'
+      }
+      for (const [abbr, mm] of Object.entries(thaiMonths)) {
+        const m = name.match(new RegExp('(\\d+)\\s*' + abbr.replace('.','\\.')))
+        if (m) {
+          const day = String(m[1]).padStart(2, '0')
+          return { date: `2026-${mm}-${day}`, slot }
+        }
+      }
+      // fallback: ตัวเลข เช่น "10/3" หรือ "10-3"
+      const numM = name.match(/(\d{1,2})[\/\-](\d{1,2})/)
+      if (numM) {
+        const day = String(numM[1]).padStart(2,'0')
+        const mo  = String(numM[2]).padStart(2,'0')
+        return { date: `2026-${mo}-${day}`, slot }
+      }
+      return null
     }
 
     const XLSX2 = require('xlsx')
