@@ -388,7 +388,8 @@ app.post('/api/import-file', async (req, res) => {
 
       const ws = wb.Sheets[sheetName]
       const rows = XLSX2.utils.sheet_to_json(ws, { header: 1, defval: '' })
-      const dataRows = rows.filter(r => typeof r[0] === 'number' && r[0] > 0)
+      // กรองเฉพาะแถวที่มีชื่อร้านจริงๆ — ไม่เอา template row ว่าง
+      const dataRows = rows.filter(r => typeof r[0] === 'number' && r[0] > 0 && String(r[1]||'').trim())
       if (!dataRows.length) { skipped++; continue }
       log.push(`${sheetName} → ${date}${slot ? ' ['+slot+']' : ''} : ${dataRows.length} rows`)
 
