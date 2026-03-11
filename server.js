@@ -57,7 +57,8 @@ app.get('/api/rows', async (req, res) => {
   try {
     const date = req.query.date || new Date().toISOString().slice(0, 10)
     const r = await pool.query(
-      `SELECT * FROM delivery_rows WHERE session_date = $1 ORDER BY carrier, sort_order, id`,
+      `SELECT * FROM delivery_rows WHERE session_date = $1
+       ORDER BY carrier, session_slot NULLS LAST, province, shop_name, id`,
       [date]
     )
     res.json({ ok: true, rows: r.rows, date })
@@ -76,7 +77,7 @@ app.get('/api/rows/search', async (req, res) => {
       `SELECT * FROM delivery_rows
        WHERE (shop_name ILIKE $1 OR province ILIKE $1 OR invoice_no ILIKE $1)
        ${carrier ? 'AND carrier = $2' : ''}
-       ORDER BY session_date DESC, carrier, session_slot, sort_order, id
+       ORDER BY session_date DESC, carrier, session_slot NULLS LAST, province, shop_name, id
        LIMIT 200`,
       carrier ? [like, carrier] : [like]
     )
@@ -94,7 +95,7 @@ app.get('/api/rows/month', async (req, res) => {
     const r = await pool.query(
       `SELECT * FROM delivery_rows
        WHERE TO_CHAR(session_date, 'YYYY-MM') = $1
-       ORDER BY session_date, carrier, sort_order, id`,
+       ORDER BY session_date, carrier, session_slot NULLS LAST, province, shop_name, id`,
       [month]
     )
     res.json({ ok: true, rows: r.rows, month })
@@ -284,7 +285,7 @@ app.get('/api/export/month', async (req, res) => {
       `SELECT * FROM delivery_rows
        WHERE TO_CHAR(session_date, 'YYYY-MM') = $1
        ${filterCarrier ? 'AND carrier = $2' : ''}
-       ORDER BY session_date, carrier, id`,
+       ORDER BY session_date, carrier, session_slot NULLS LAST, province, shop_name, id`,
       filterCarrier ? [month, filterCarrier] : [month]
     )
 
