@@ -9,7 +9,11 @@ const app = express()
 const PORT = process.env.PORT || 3100
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } })
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+// สร้าง Anthropic client ใหม่ทุก request เพื่อดึง key ล่าสุดเสมอ
+function getAnthropic() {
+  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+}
 
 // ── DB ──
 const dbUrl = process.env.DATABASE_URL || ''
@@ -187,7 +191,7 @@ app.post('/api/ocr', upload.array('images', 20), async (req, res) => {
     for (const file of files) {
       const base64 = file.buffer.toString('base64')
       try {
-        const msg = await anthropic.messages.create({
+        const msg = await getAnthropic().messages.create({
           model: 'claude-opus-4-5',
           max_tokens: 1024,
           messages: [{
@@ -467,6 +471,16 @@ app.post('/api/import', upload.single('file'), async (req, res) => {
     console.error('import error:', e)
     res.json({ ok: false, error: e.message })
   }
+})
+
+// ── Update API Key at runtime (no redeploy needed) ──
+app.post('/api/update-key', (req, res) => {
+  const { key, secret } = req.body
+  if (secret !== (process.env.IMPORT_SECRET || 'newlife2026')) return res.json({ ok: false, error: 'unauthorized' })
+  if (!key || !key.startsWith('sk-ant-')) return res.json({ ok: false, error: 'invalid key format' })
+  process.env.ANTHROPIC_API_KEY = key
+  console.log(`🔑 API key updated at ${new Date().toISOString()}`)
+  res.json({ ok: true })
 })
 
 // ── START ──
