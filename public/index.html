@@ -179,6 +179,8 @@ tr:hover td{background:#f8faff}
 .cell.editing input,.cell.editing select{display:block}
 .badge-red{display:inline-block;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
 .tr-red td{background:#fff5f5 !important}
+.row-new td{animation:flashNew 3s ease-out forwards}
+@keyframes flashNew{0%{background:#d1fae5}60%{background:#d1fae5}100%{background:transparent}}
 .slot-btn{flex:1;padding:8px 10px;border-radius:8px;border:2px solid var(--bd);background:var(--bg);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;color:var(--tx2)}
 .slot-btn.active{border-color:var(--green);background:var(--green-bg);color:var(--green)}
 .slot-btn:active{transform:scale(.96)}
@@ -389,10 +391,13 @@ let editingRow = { inter: -1, dmk: -1 }
 let sessionDate = new Date().toISOString().slice(0,10)
 let searchQ = ''
 let searchMode = false
+let knownIds = new Set()
+let pollTimer = null
 
 document.getElementById('dateInput').value = sessionDate
 document.getElementById('monthInput').value = sessionDate.slice(0,7)
 loadDate(sessionDate)
+startPolling()
 
 // ── DATE ──
 async function loadDate(date) {
@@ -400,12 +405,14 @@ async function loadDate(date) {
   document.getElementById('dateInput').value = date
   document.getElementById('monthInput').value = date.slice(0,7)
   editingRow = { inter:-1, dmk:-1 }
+  knownIds = new Set()
   try {
     const res = await fetch(`/api/rows?date=${date}`)
     const data = await res.json()
     if (data.ok) {
       rows.inter = data.rows.filter(r => r.carrier==='inter')
       rows.dmk   = data.rows.filter(r => r.carrier==='dmk')
+      knownIds   = new Set(data.rows.map(r => r.id))
       renderAll()
     }
   } catch(e) { showToast('❌ โหลดไม่ได้') }
@@ -681,6 +688,7 @@ function makeTbl(c, fRows, theadClass) {
   fRows.forEach(r => {
     const i = rows[c].indexOf(r), ed = i === eRow
     const tr = document.createElement('tr')
+    tr.setAttribute('data-id', r.id)
     if (r.red_sticker) tr.className = 'tr-red'
     const sv = (val,ph,key) => ed
       ? `<div class="cell editing"><input id="inp-${key}-${c}-${i}" value="${esc(val)}" placeholder="${ph}" oninput="rows['${c}'][${i}].${key}=this.value"></div>`
@@ -834,6 +842,52 @@ async function exportMonth(c) {
 function showToast(msg){
   const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show')
   setTimeout(()=>t.classList.remove('show'),2800)
+}
+
+// ── POLLING (real-time update ทุก 10 วิ) ──
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer)
+  pollTimer = setInterval(async () => {
+    if (editingRow.inter >= 0 || editingRow.dmk >= 0) return  // กำลัง edit อยู่ — ข้าม
+    if (searchMode) return  // กำลัง search — ข้าม
+    try {
+      const res = await fetch(`/api/rows?date=${sessionDate}`)
+      const data = await res.json()
+      if (!data.ok) return
+      const newInter = data.rows.filter(r => r.carrier==='inter')
+      const newDmk   = data.rows.filter(r => r.carrier==='dmk')
+
+      // หา id ใหม่
+      const newIds = new Set(data.rows.map(r => r.id))
+      const added = data.rows.filter(r => knownIds.size > 0 && !knownIds.has(r.id))
+
+      // อัปเดตถ้ามีการเปลี่ยนแปลง
+      const changed =
+        newInter.length !== rows.inter.length ||
+        newDmk.length !== rows.dmk.length ||
+        added.length > 0
+
+      if (changed) {
+        rows.inter = newInter
+        rows.dmk   = newDmk
+        knownIds   = newIds
+        renderAllNow()
+        // highlight แถวใหม่
+        if (added.length > 0) {
+          added.forEach(r => {
+            const el = document.querySelector(`tr[data-id="${r.id}"]`)
+            if (el) {
+              el.classList.add('row-new')
+              setTimeout(() => el.classList.remove('row-new'), 3000)
+            }
+          })
+          showToast(`✨ มีรายการใหม่ ${added.length} รายการ`)
+        }
+      }
+
+      knownIds = newIds
+    } catch(e) {}
+  }, 10000)
 }
 </script>
 </body>

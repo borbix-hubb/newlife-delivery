@@ -91,6 +91,8 @@ td{padding:8px 10px;border-bottom:1px solid #f8fafc;vertical-align:middle;font-s
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#f8faff}
 .tr-red td{background:#fff5f5 !important}
+.row-new td{animation:flashNew 3s ease-out forwards}
+@keyframes flashNew{0%{background:#d1fae5}60%{background:#d1fae5}100%{background:transparent}}
 .td-no{width:36px;text-align:center;font-size:11px;font-weight:700;color:var(--tx3)}
 .td-qty{width:60px;text-align:center;font-weight:700}
 .td-inv{width:115px;font-family:monospace;font-size:12px;color:#0369a1}
@@ -209,9 +211,12 @@ let searchResults = []
 let activeTab = 'all'  // 'all' | 'inter' | 'dmk'
 let sessionDate = new Date().toISOString().slice(0,10)
 let searchTimer = null
+let knownIds = new Set()
+let pollTimer = null
 
 document.getElementById('dateInput').value = sessionDate
 loadDate(sessionDate)
+startPolling()
 
 function setTab(t) {
   activeTab = t
@@ -226,6 +231,7 @@ async function loadDate(date) {
   document.getElementById('searchClear').className = 'search-clear'
   document.getElementById('searchHint').style.display = 'none'
   sessionDate = date
+  knownIds = new Set()
   document.getElementById('dateInput').value = date
   document.getElementById('loadingDiv').style.display = 'block'
   hideAll()
@@ -235,6 +241,7 @@ async function loadDate(date) {
     if (data.ok) {
       allRows.inter = data.rows.filter(r => r.carrier === 'inter')
       allRows.dmk   = data.rows.filter(r => r.carrier === 'dmk')
+      knownIds = new Set(data.rows.map(r => r.id))
       renderDay()
     }
   } catch(e) { showToast('❌ โหลดไม่ได้') }
@@ -418,6 +425,7 @@ function buildTable(rowList, theadClass, startSeq) {
   const tbody=document.createElement('tbody')
   rowList.forEach((r,i) => {
     const tr=document.createElement('tr')
+    tr.setAttribute('data-id', r.id)
     if (r.red_sticker) tr.className='tr-red'
     tr.innerHTML=`
       <td class="td-no">${startSeq+i+1}</td>
@@ -484,6 +492,35 @@ function hideAll() {
 function showToast(msg) {
   const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show')
   setTimeout(()=>t.classList.remove('show'),2500)
+}
+
+// ── POLLING real-time ทุก 10 วิ ──
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer)
+  pollTimer = setInterval(async () => {
+    if (searchMode) return
+    try {
+      const res = await fetch(`/api/rows?date=${sessionDate}`)
+      const data = await res.json()
+      if (!data.ok) return
+      const added = data.rows.filter(r => knownIds.size > 0 && !knownIds.has(r.id))
+      const changed = data.rows.length !== (allRows.inter.length + allRows.dmk.length) || added.length > 0
+      if (changed) {
+        allRows.inter = data.rows.filter(r => r.carrier==='inter')
+        allRows.dmk   = data.rows.filter(r => r.carrier==='dmk')
+        knownIds      = new Set(data.rows.map(r => r.id))
+        renderDay()
+        if (added.length > 0) {
+          added.forEach(r => {
+            const el = document.querySelector(`tr[data-id="${r.id}"]`)
+            if (el) { el.classList.add('row-new'); setTimeout(()=>el.classList.remove('row-new'),3000) }
+          })
+          showToast(`✨ มีรายการใหม่ ${added.length} รายการ`)
+        }
+      }
+      knownIds = new Set(data.rows.map(r => r.id))
+    } catch(e) {}
+  }, 10000)
 }
 </script>
 </body>
