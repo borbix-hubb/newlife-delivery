@@ -1,7 +1,7 @@
 const express = require('express')
 const multer = require('multer')
 const path = require('path')
-const Anthropic = require('@anthropic-ai/sdk')
+const { GoogleGenerativeAI } = require('@google/generative-ai')
 const XLSX = require('xlsx')
 const { Pool } = require('pg')
 
@@ -10,9 +10,9 @@ const PORT = process.env.PORT || 3100
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } })
 
-// สร้าง Anthropic client ใหม่ทุก request เพื่อดึง key ล่าสุดเสมอ
-function getAnthropic() {
-  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+// Gemini client
+function getGemini() {
+  return new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY)
 }
 
 // ── DB ──
@@ -191,16 +191,8 @@ app.post('/api/ocr', upload.array('images', 20), async (req, res) => {
     for (const file of files) {
       const base64 = file.buffer.toString('base64')
       try {
-        const msg = await getAnthropic().messages.create({
-          model: 'claude-opus-4-5',
-          max_tokens: 1024,
-          messages: [{
-            role: 'user',
-            content: [
-              { type: 'image', source: { type: 'base64', media_type: file.mimetype, data: base64 } },
-              {
-                type: 'text',
-                text: `อ่านข้อมูลจากใบนำส่งสินค้าของบริษัทนิวไลฟ์ ฟาร์มา ในรูปนี้ แล้วตอบเป็น JSON เท่านั้น ห้ามมีข้อความอื่น:
+        const model = getGemini().getGenerativeModel({ model: 'gemini-2.5-flash' })
+        const prompt = `อ่านข้อมูลจากใบนำส่งสินค้าของบริษัทนิวไลฟ์ ฟาร์มา ในรูปนี้ แล้วตอบเป็น JSON เท่านั้น ห้ามมีข้อความอื่น:
 {
   "shop_name": "ชื่อผู้รับสินค้าปลายทาง เช่น ห้างหุ้นส่วนสามัญ ร้านอุดมเวชภัณฑ์ (คัดลอกมาเต็มๆ)",
   "province": "ชื่อจังหวัดเท่านั้น ไม่มีคำว่า จังหวัด นำหน้า เช่น พิจิตร, กรุงเทพมหานคร",
@@ -208,13 +200,13 @@ app.post('/api/ocr', upload.array('images', 20), async (req, res) => {
   "quantity": จำนวนรวม กล่องหรือลัง จากช่อง รวม ในใบนำส่ง (ตัวเลขจำนวนเต็ม ถ้าไม่พบใส่ 0)
 }
 ถ้าไม่พบข้อมูลให้ใส่ "" หรือ 0 ตามประเภท`
-              }
-            ]
-          }]
-        })
+        const result = await model.generateContent([
+          prompt,
+          { inlineData: { mimeType: file.mimetype, data: base64 } }
+        ])
+        const text = result.response.text().trim()
 
         let data = { shop_name: '', province: '', invoice_no: '', quantity: 0 }
-        const text = msg.content[0].text.trim()
         const m = text.match(/\{[\s\S]*\}/)
         if (m) { try { data = { ...data, ...JSON.parse(m[0]) } } catch {} }
 
