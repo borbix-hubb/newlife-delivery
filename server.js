@@ -1,7 +1,7 @@
 const express = require('express')
 const multer = require('multer')
 const path = require('path')
-const { GoogleGenerativeAI } = require('@google/generative-ai')
+
 const XLSX = require('xlsx')
 const { Pool } = require('pg')
 
@@ -10,9 +10,19 @@ const PORT = process.env.PORT || 3100
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } })
 
-// Gemini client
-function getGemini() {
-  return new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY)
+// OCR ผ่าน OCR Proxy บน Mac (cloudflare tunnel)
+async function ocrViaGateway(base64, mimeType) {
+  const PROXY_URL = process.env.OPENCLAW_GATEWAY_URL
+  const SECRET = process.env.OPENCLAW_GATEWAY_TOKEN || 'newlife2026'
+  if (!PROXY_URL) throw new Error('OPENCLAW_GATEWAY_URL not set')
+  const resp = await fetch(`${PROXY_URL}/ocr`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ base64, mimeType, secret: SECRET })
+  })
+  const data = await resp.json()
+  if (!data.ok) throw new Error(data.error || 'OCR failed')
+  return data.result
 }
 
 // ── DB ──
@@ -191,24 +201,13 @@ app.post('/api/ocr', upload.array('images', 20), async (req, res) => {
     for (const file of files) {
       const base64 = file.buffer.toString('base64')
       try {
-        const model = getGemini().getGenerativeModel({ model: 'gemini-2.5-flash' })
-        const prompt = `อ่านข้อมูลจากใบนำส่งสินค้าของบริษัทนิวไลฟ์ ฟาร์มา ในรูปนี้ แล้วตอบเป็น JSON เท่านั้น ห้ามมีข้อความอื่น:
-{
-  "shop_name": "ชื่อผู้รับสินค้าปลายทาง เช่น ห้างหุ้นส่วนสามัญ ร้านอุดมเวชภัณฑ์ (คัดลอกมาเต็มๆ)",
-  "province": "ชื่อจังหวัดเท่านั้น ไม่มีคำว่า จังหวัด นำหน้า เช่น พิจิตร, กรุงเทพมหานคร",
-  "invoice_no": "เลข Invoice หรือ BILL NO. เช่น IV69030970",
-  "quantity": จำนวนรวม กล่องหรือลัง จากช่อง รวม ในใบนำส่ง (ตัวเลขจำนวนเต็ม ถ้าไม่พบใส่ 0)
-}
-ถ้าไม่พบข้อมูลให้ใส่ "" หรือ 0 ตามประเภท`
-        const result = await model.generateContent([
-          prompt,
-          { inlineData: { mimeType: file.mimetype, data: base64 } }
-        ])
-        const text = result.response.text().trim()
-
         let data = { shop_name: '', province: '', invoice_no: '', quantity: 0 }
-        const m = text.match(/\{[\s\S]*\}/)
-        if (m) { try { data = { ...data, ...JSON.parse(m[0]) } } catch {} }
+        try {
+          const parsed = await ocrViaGateway(base64, file.mimetype)
+          data = { ...data, ...parsed }
+        } catch (ocrErr) {
+          console.error('OCR error:', ocrErr.message)
+        }
 
         // บันทึกลง DB เลย
         const dbRow = await pool.query(
