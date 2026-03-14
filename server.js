@@ -70,9 +70,12 @@ app.get('/view', (req, res) => {
 app.get('/api/rows', async (req, res) => {
   try {
     const date = req.query.date || new Date().toISOString().slice(0, 10)
+    const sort = req.query.sort || 'province' // 'created' = ลำดับที่ถ่าย, 'province' = เรียง province
+    const orderBy = sort === 'created'
+      ? 'carrier, session_slot NULLS LAST, created_at, id'
+      : 'carrier, session_slot NULLS LAST, province, shop_name, id'
     const r = await pool.query(
-      `SELECT * FROM delivery_rows WHERE session_date = $1
-       ORDER BY carrier, session_slot NULLS LAST, province, shop_name, id`,
+      `SELECT * FROM delivery_rows WHERE session_date = $1 ORDER BY ${orderBy}`,
       [date]
     )
     res.json({ ok: true, rows: r.rows, date })

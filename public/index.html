@@ -407,7 +407,7 @@ async function loadDate(date) {
   editingRow = { inter:-1, dmk:-1 }
   knownIds = new Set()
   try {
-    const res = await fetch(`/api/rows?date=${date}`)
+    const res = await fetch(`/api/rows?date=${date}&sort=created`)
     const data = await res.json()
     if (data.ok) {
       rows.inter = data.rows.filter(r => r.carrier==='inter')
@@ -851,7 +851,7 @@ function startPolling() {
     if (editingRow.inter >= 0 || editingRow.dmk >= 0) return  // กำลัง edit อยู่ — ข้าม
     if (searchMode) return  // กำลัง search — ข้าม
     try {
-      const res = await fetch(`/api/rows?date=${sessionDate}`)
+      const res = await fetch(`/api/rows?date=${sessionDate}&sort=created`)
       const data = await res.json()
       if (!data.ok) return
       const newInter = data.rows.filter(r => r.carrier==='inter')
