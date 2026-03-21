@@ -10,19 +10,31 @@ const PORT = process.env.PORT || 3100
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } })
 
-// OCR ผ่าน OCR Proxy บน Mac (cloudflare tunnel)
+// OCR ผ่าน OCR Proxy บน Mac (cloudflare tunnel) — retry 3 ครั้ง
 async function ocrViaGateway(base64, mimeType) {
   const PROXY_URL = process.env.OPENCLAW_GATEWAY_URL
   const SECRET = process.env.OPENCLAW_GATEWAY_TOKEN || 'newlife2026'
   if (!PROXY_URL) throw new Error('OPENCLAW_GATEWAY_URL not set')
-  const resp = await fetch(`${PROXY_URL}/ocr`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ base64, mimeType, secret: SECRET })
-  })
-  const data = await resp.json()
-  if (!data.ok) throw new Error(data.error || 'OCR failed')
-  return data.result
+
+  let lastErr
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const resp = await fetch(`${PROXY_URL}/ocr`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ base64, mimeType, secret: SECRET }),
+        signal: AbortSignal.timeout(30000)
+      })
+      const data = await resp.json()
+      if (!data.ok) throw new Error(data.error || 'OCR failed')
+      return data.result
+    } catch (e) {
+      lastErr = e
+      console.error(`OCR attempt ${attempt} failed:`, e.message)
+      if (attempt < 3) await new Promise(r => setTimeout(r, 2000 * attempt)) // รอ 2s, 4s
+    }
+  }
+  throw lastErr
 }
 
 // ── DB ──
@@ -82,6 +94,18 @@ app.get('/api/rows', async (req, res) => {
   } catch (e) {
     res.json({ ok: false, error: e.message })
   }
+})
+
+// ── Admin: query rows by created_at date (for recovery) ──
+app.get('/api/admin/recover', async (req, res) => {
+  const { secret, created_date } = req.query
+  if (secret !== 'newlife2026') return res.status(403).json({ ok: false })
+  const r = await pool.query(
+    `SELECT id, shop_name, province, invoice_no, quantity, red_sticker, session_date, session_slot, created_at
+     FROM delivery_rows WHERE DATE(created_at) = $1 ORDER BY id`,
+    [created_date]
+  )
+  res.json({ ok: true, rows: r.rows })
 })
 
 // ── Search rows across all dates ──
