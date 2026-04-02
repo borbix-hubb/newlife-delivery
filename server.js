@@ -23,7 +23,7 @@ async function ocrViaGateway(base64, mimeType) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ base64, mimeType, secret: SECRET }),
-        signal: AbortSignal.timeout(30000)
+        signal: AbortSignal.timeout(90000)
       })
       const data = await resp.json()
       if (!data.ok) throw new Error(data.error || 'OCR failed')
