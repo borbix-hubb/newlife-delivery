@@ -36,11 +36,10 @@ async function ocrViaGateway(base64, mimeType) {
     signal: AbortSignal.timeout(30000)
   })
 
-  if (!resp.ok) {
-    const err = await resp.text()
-    throw new Error(`Anthropic ${resp.status}: ${err.slice(0, 100)}`)
-  }
-  const data = await resp.json()
+  const rawText = await resp.text()
+  console.log(`Anthropic status: ${resp.status} | body: ${rawText.slice(0, 200)}`)
+  if (!resp.ok) throw new Error(`Anthropic ${resp.status}: ${rawText.slice(0, 100)}`)
+  const data = JSON.parse(rawText)
   const text = data?.content?.[0]?.text || ''
   const m = text.match(/\{[\s\S]*\}/)
   if (!m) throw new Error('parse failed: ' + text.slice(0, 100))
