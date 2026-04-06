@@ -10,31 +10,41 @@ const PORT = process.env.PORT || 3100
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } })
 
-// OCR ผ่าน OCR Proxy บน Mac (cloudflare tunnel) — retry 3 ครั้ง
+// OCR ผ่าน Anthropic API โดยตรง (claude-haiku — ถูกสุด)
 async function ocrViaGateway(base64, mimeType) {
-  const PROXY_URL = process.env.OPENCLAW_GATEWAY_URL
-  const SECRET = process.env.OPENCLAW_GATEWAY_TOKEN || 'newlife2026'
-  if (!PROXY_URL) throw new Error('OPENCLAW_GATEWAY_URL not set')
+  const API_KEY = process.env.ANTHROPIC_API_KEY
+  if (!API_KEY) throw new Error('ANTHROPIC_API_KEY not set')
 
-  let lastErr
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      const resp = await fetch(`${PROXY_URL}/ocr`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ base64, mimeType, secret: SECRET }),
-        signal: AbortSignal.timeout(90000)
-      })
-      const data = await resp.json()
-      if (!data.ok) throw new Error(data.error || 'OCR failed')
-      return data.result
-    } catch (e) {
-      lastErr = e
-      console.error(`OCR attempt ${attempt} failed:`, e.message)
-      if (attempt < 3) await new Promise(r => setTimeout(r, 2000 * attempt)) // รอ 2s, 4s
-    }
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 200,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64 } },
+          { type: 'text', text: 'ตอบ JSON เท่านั้น ห้ามมีข้อความอื่น:\n{"shop_name":"ชื่อผู้รับ","province":"จังหวัด","invoice_no":"เลข invoice","quantity":0}\nถ้าไม่พบใส่"" หรือ 0' }
+        ]
+      }]
+    }),
+    signal: AbortSignal.timeout(30000)
+  })
+
+  if (!resp.ok) {
+    const err = await resp.text()
+    throw new Error(`Anthropic ${resp.status}: ${err.slice(0, 100)}`)
   }
-  throw lastErr
+  const data = await resp.json()
+  const text = data?.content?.[0]?.text || ''
+  const m = text.match(/\{[\s\S]*\}/)
+  if (!m) throw new Error('parse failed: ' + text.slice(0, 100))
+  return JSON.parse(m[0])
 }
 
 // ── DB ──
